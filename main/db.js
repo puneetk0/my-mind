@@ -31,6 +31,30 @@ async function init() {
     completed INTEGER DEFAULT 0, position INTEGER
   )`);
 
+  try { db.run(`ALTER TABLE tasks ADD COLUMN constructor_id INTEGER`); } catch(e){}
+  try { db.run(`ALTER TABLE tasks ADD COLUMN lane INTEGER`); } catch(e){}
+
+  db.run(`CREATE TABLE IF NOT EXISTS constructors (
+    id INTEGER PRIMARY KEY, name TEXT NOT NULL, primary_color TEXT NOT NULL,
+    secondary_color TEXT NOT NULL, car_file TEXT NOT NULL
+  )`);
+  
+  const cCount = db.exec('SELECT COUNT(*) FROM constructors');
+  if (!cCount.length || cCount[0].values[0][0] === 0) {
+    db.run(`INSERT INTO constructors VALUES
+      (1,  'Red Bull Racing', '#3671C6', '#FF1E00', 'redbull.png'),
+      (2,  'Ferrari',         '#E8002D', '#FFCC00', 'ferrari.png'),
+      (3,  'McLaren',         '#FF8000', '#000000', 'mclaren.png'),
+      (4,  'Mercedes',        '#00D2BE', '#000000', 'mercedes.png'),
+      (5,  'Aston Martin',    '#006F62', '#CEDC00', 'astonmartin.png'),
+      (6,  'Alpine',          '#FF87BC', '#0090FF', 'alpine.png'),
+      (7,  'Williams',        '#005AFF', '#FFFFFF', 'williams.png'),
+      (8,  'Haas',            '#B6BABD', '#E8002D', 'haas.png'),
+      (9,  'Visa RB',         '#6692FF', '#C8001E', 'visarb.png'),
+      (10, 'Kick Sauber',     '#52E252', '#000000', 'sauber.png')
+    `);
+  }
+
   save();
   console.log('Pond DB ready at', dbPath);
 }
@@ -44,28 +68,50 @@ function save() {
 
 function getAllTasks() {
   const rows = db.exec(
-    `SELECT id, title, note, completed, position, created_at FROM tasks WHERE completed = 0 ORDER BY position ASC, created_at ASC`
+    `SELECT t.id, t.title, t.note, t.completed, t.position, t.created_at, t.constructor_id, t.lane,
+            c.name as constructor_name, c.primary_color, c.secondary_color, c.car_file
+     FROM tasks t
+     LEFT JOIN constructors c ON t.constructor_id = c.id
+     WHERE t.completed = 0 ORDER BY t.position ASC, t.created_at ASC`
   );
   if (!rows.length) return [];
 
-  return rows[0].values.map(([id, title, note, completed, position, created_at]) => {
+  return rows[0].values.map(([id, title, note, completed, position, created_at, constructor_id, lane, c_name, c_pri, c_sec, c_car]) => {
     const sub = db.exec(`SELECT id, task_id, title, completed, position FROM subtasks WHERE task_id = ? ORDER BY position ASC`, [id]);
     const subtasks = sub.length ? sub[0].values.map(([sid, stid, stitle, scomp, spos]) => ({
       id: sid, task_id: stid, title: stitle, completed: Boolean(scomp), position: spos,
     })) : [];
-    return { id, title, note, completed: Boolean(completed), position, created_at, subtasks };
+    return { 
+      id, title, note, completed: Boolean(completed), position, created_at, 
+      constructor_id, lane, 
+      constructor_name: c_name, primary_color: c_pri, secondary_color: c_sec, car_file: c_car,
+      subtasks 
+    };
   });
 }
 
-function addTask({ title, note, subtasks }) {
+function getAvailableConstructors() {
+  const occRaw = db.exec('SELECT constructor_id FROM tasks WHERE completed = 0 AND constructor_id IS NOT NULL');
+  const occupiedLanes = occRaw.length ? occRaw[0].values.map(v => v[0]) : [];
+  
+  const allRaw = db.exec('SELECT * FROM constructors ORDER BY id');
+  if (!allRaw.length) return [];
+  
+  return allRaw[0].values.map(([id, name, primary_color, secondary_color, car_file]) => ({
+    id, name, primary_color, secondary_color, car_file,
+    available: !occupiedLanes.includes(id)
+  }));
+}
+
+function addTask({ title, note, subtasks, constructor_id }) {
   const { v4: uuidv4 } = require('uuid');
   const taskId = uuidv4();
   const now = Date.now();
   const maxR = db.exec('SELECT MAX(position) FROM tasks');
   const pos = (maxR.length && maxR[0].values[0][0] !== null ? maxR[0].values[0][0] : -1) + 1;
 
-  db.run(`INSERT INTO tasks (id,title,note,completed,position,created_at) VALUES (?,?,?,0,?,?)`,
-    [taskId, title, note || null, pos, now]);
+  db.run(`INSERT INTO tasks (id,title,note,completed,position,created_at,constructor_id,lane) VALUES (?,?,?,0,?,?,?,?)`,
+    [taskId, title, note || null, pos, now, constructor_id || null, constructor_id || null]);
 
   if (subtasks && subtasks.length) {
     subtasks.forEach((st, i) => {
@@ -99,4 +145,4 @@ function toggleSubtask(id) {
 
 function close() { if (db) { save(); db.close(); } }
 
-module.exports = { init, getAllTasks, addTask, completeTask, deleteTask, toggleSubtask, close };
+module.exports = { init, getAllTasks, addTask, completeTask, deleteTask, toggleSubtask, getAvailableConstructors, close };

@@ -1,17 +1,25 @@
 /* ==========================================
-   Pond — Global Styles
+   Pond V2 — F1 Track Edition Styles
    ========================================== */
 
 :root {
-  --bg: #FFFFFF;
-  --card: #F8F8F8;
-  --card-border: #EBEBEB;
-  --text-primary: #1A1A1A;
-  --text-secondary: #888888;
-  --text-done: #BBBBBB;
-  --divider: #F0F0F0;
-  --btn-primary-bg: #1A1A1A;
-  --btn-primary-text: #FFFFFF;
+  --bg-dark:        #1a1a1a;
+  --track-surface:  #2a2a2a;
+  --lane-border:    rgba(255,255,255,0.08);
+  --finish-line:    #ffffff;
+  --start-line:     rgba(255,255,255,0.4);
+  --text-primary:   #ffffff;
+  --text-secondary: rgba(255,255,255,0.5);
+  --text-label:     rgba(255,255,255,0.7);
+  --btn-primary:    #ffffff;
+  --btn-primary-text: #1a1a1a;
+  --btn-muted:      rgba(255,255,255,0.3);
+
+  --text-xs:   9px;
+  --text-sm:  11px;
+  --text-base: 13px;
+  --text-lg:  15px;
+  --text-xl:  17px;
 }
 
 *, *::before, *::after {
@@ -24,41 +32,27 @@ html, body, #root {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: var(--bg);
+  background: var(--bg-dark);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 13px;
+  font-size: var(--text-base);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
 }
 
+/* Sharp edges for tracking UI, rounded overall */
 #root {
   border-radius: 14px;
-  overflow: hidden;
 }
 
 ::-webkit-scrollbar {
   display: none;
 }
 
-/* ==========================================
-   Home Screen
-   ========================================== */
-
-.home {
-  display: flex;
-  flex-direction: column;
-  height: 420px;
-  max-height: 420px;
-  padding: 8px;
-}
-
-.task-list {
-  flex: 1;
-  overflow-y: auto;
-  scrollbar-width: none;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 14px;
+  flex-shrink: 0;
 }
 
 .empty-state {
@@ -67,71 +61,113 @@ html, body, #root {
   align-items: center;
   justify-content: center;
   color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 400;
+  font-size: var(--text-base);
 }
 
 /* ==========================================
-   Task Card
+   Home Screen / Track Layout
    ========================================== */
 
-.task-card {
+.pond-root {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  min-height: 44px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  background: var(--card);
-  border: 1px solid var(--card-border);
+  height: 460px;
+}
+
+.track-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background-color: var(--track-surface);
+  background-image: url('../assets/track-bg.png');
+  background-size: cover;
+  background-position: center;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.lanes-wrapper {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr); 
+  gap: 13px; /* Exactly matches the 13px white strip separating 690px */
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.lane {
+  position: relative;
+  height: 100%;
   cursor: pointer;
-  text-align: left;
-  font-size: 13px;
+}
+.lane:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.car-img {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 52px;
+  height: 26px;
+  transition: bottom 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 2;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task-label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70px;
+  text-align: center;
+  font-size: 10px;
+  color: #fff;
   font-weight: 500;
-  color: var(--text-primary);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  display: block;
-  font-family: inherit;
+  padding-top: 4px;
 }
 
-.task-card:hover {
-  background: #F3F3F3;
-}
-
-.task-card:active {
-  background: #EEEEEE;
-}
-
-/* ==========================================
-   Add Button (shared)
-   ========================================== */
-
-.add-button {
-  width: 100%;
-  height: 44px;
-  border-radius: 10px;
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
+.add-lane-btn {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #000;
+  color: #fff;
   border: none;
+  font-size: 20px;
+  line-height: 30px;
+  text-align: center;
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  font-family: inherit;
-  margin-top: 8px;
-  flex-shrink: 0;
+  z-index: 5;
+  transition: transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
 }
 
-.add-button:hover {
-  opacity: 0.9;
-}
-
-.add-button:active {
+.add-lane-btn:hover {
+  transform: translateX(-50%) scale(1.1);
   opacity: 0.8;
 }
 
-.add-button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+.add-lane-btn:active {
+  transform: translateX(-50%) scale(0.9);
 }
 
 /* ==========================================
@@ -141,63 +177,51 @@ html, body, #root {
 .add-task {
   display: flex;
   flex-direction: column;
-  height: 420px;
-  max-height: 420px;
+  height: 460px;
+  max-height: 460px;
 }
 
 .add-title-input {
-  font-size: 17px;
+  font-size: var(--text-xl);
   font-weight: 600;
   border: none;
   outline: none;
   width: 100%;
-  padding: 12px 14px;
+  padding: 14px;
+  margin-top: 14px;
   font-family: inherit;
   color: var(--text-primary);
   background: transparent;
 }
 
-.add-title-input::placeholder {
-  color: var(--text-secondary);
-}
-
-.divider {
-  height: 1px;
-  background: var(--divider);
-  margin: 0 14px;
-  flex-shrink: 0;
-}
+.add-title-input::placeholder { color: var(--text-secondary); }
 
 .add-note-input {
-  font-size: 13px;
+  font-size: var(--text-base);
   border: none;
   outline: none;
   resize: none;
-  min-height: 60px;
-  padding: 8px 14px;
+  min-height: 80px;
+  padding: 10px 14px;
   font-family: inherit;
   color: var(--text-primary);
   background: transparent;
 }
-
-.add-note-input::placeholder {
-  color: var(--text-secondary);
-}
+.add-note-input::placeholder { color: var(--text-secondary); }
 
 .subtask-section {
   flex: 1;
   overflow-y: auto;
-  scrollbar-width: none;
   padding-top: 4px;
 }
 
 .section-label {
-  font-size: 11px;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: 6px 14px;
+  padding: 8px 14px;
   display: block;
 }
 
@@ -209,183 +233,251 @@ html, body, #root {
 }
 
 .subtask-bullet {
-  color: #BBBBBB;
-  font-size: 13px;
-  flex-shrink: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
 }
 
 .subtask-input {
   flex: 1;
   border: none;
   outline: none;
-  font-size: 13px;
+  font-size: var(--text-base);
   font-family: inherit;
   color: var(--text-primary);
   background: transparent;
 }
-
-.subtask-input::placeholder {
-  color: var(--text-secondary);
-}
+.subtask-input::placeholder { color: var(--text-secondary); }
 
 .remove-btn {
   font-size: 16px;
-  color: #BBBBBB;
+  color: var(--text-secondary);
   cursor: pointer;
   border: none;
   background: transparent;
-  padding: 0;
-  line-height: 1;
-  flex-shrink: 0;
 }
-
-.remove-btn:hover {
-  color: var(--text-primary);
-}
+.remove-btn:hover { color: var(--text-primary); }
 
 .add-subtask-btn {
   background: transparent;
   border: none;
   color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 400;
+  font-size: var(--text-base);
   cursor: pointer;
-  padding: 6px 14px;
+  padding: 8px 14px;
   text-align: left;
-  font-family: inherit;
+}
+.add-subtask-btn:hover { color: var(--text-primary); }
+
+/* Constructor Picker */
+
+.constructor-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  padding: 0 14px 14px 14px;
+  margin-top: 4px;
 }
 
-.add-subtask-btn:hover {
-  color: var(--text-primary);
+.constructor-chip {
+  height: 38px;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.1s, opacity 0.2s;
+  overflow: hidden;
+  position: relative;
 }
 
+.constructor-chip:hover:not(.disabled) {
+  transform: scale(1.03);
+}
+
+.constructor-chip.selected {
+  border-color: #fff;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  z-index: 2;
+}
+
+.constructor-chip.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  filter: grayscale(80%);
+}
+
+.constructor-chip-label {
+  z-index: 2;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  white-space: nowrap;
+  padding: 0 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Button Row */
 .button-row {
   display: flex;
-  gap: 8px;
-  padding: 8px;
+  gap: 12px;
+  padding: 14px;
   flex-shrink: 0;
+  width: 100%;
 }
+
+.add-button {
+  flex: 1;
+  height: 44px;
+  border-radius: 8px;
+  background: var(--btn-primary);
+  color: var(--btn-primary-text);
+  border: none;
+  cursor: pointer;
+  font-size: var(--text-base);
+  font-weight: 600;
+  font-family: inherit;
+}
+.add-button:hover:not(:disabled) { opacity: 0.9; transform: scale(0.99); }
+.add-button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .cancel-btn {
   background: transparent;
   color: var(--text-secondary);
   border: none;
-  font-size: 13px;
+  font-size: var(--text-base);
   font-weight: 500;
   cursor: pointer;
-  padding: 12px 14px;
-  font-family: inherit;
+  padding: 0 14px;
 }
+.cancel-btn:hover { color: var(--text-primary); }
 
-.cancel-btn:hover {
-  color: var(--text-primary);
+.error-text {
+  color: #ff4d4f;
+  font-size: var(--text-sm);
+  padding: 0 14px;
+  margin-top: -4px;
+  margin-bottom: 8px;
 }
 
 /* ==========================================
-   Task Detail Screen (Phase 4)
+   Task Detail Screen
    ========================================== */
 
 .detail {
   display: flex;
   flex-direction: column;
-  height: 420px;
-  max-height: 420px;
+  height: 460px;
+  max-height: 460px;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px;
 }
 
 .back-button {
   font-size: 18px;
   color: var(--text-primary);
   cursor: pointer;
-  padding: 12px 14px;
   background: transparent;
   border: none;
-  text-align: left;
-  font-family: inherit;
-  flex-shrink: 0;
 }
+.back-button:hover { opacity: 0.7; }
 
-.back-button:hover {
-  opacity: 0.6;
+.constructor-badge {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #fff;
 }
 
 .detail-title {
-  font-size: 17px;
+  font-size: var(--text-xl);
   font-weight: 600;
   padding: 0 14px;
-  color: var(--text-primary);
-  word-wrap: break-word;
+  line-height: 1.3;
 }
 
 .detail-note {
-  font-size: 13px;
+  font-size: var(--text-base);
   color: var(--text-secondary);
-  padding: 6px 14px 0;
+  padding: 10px 14px 0;
   line-height: 1.5;
-  word-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 .subtask-list {
   flex: 1;
   overflow-y: auto;
-  scrollbar-width: none;
+  padding: 6px 0;
 }
 
 .subtask-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 36px;
+  gap: 12px;
+  min-height: 40px;
   padding: 0 14px;
 }
 
 .checkbox {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  border: 1.5px solid #DDDDDD;
+  border: 1.5px solid rgba(255,255,255,0.3);
   background: transparent;
   cursor: pointer;
-  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
-
 .checkbox.checked {
   border: none;
   background: var(--text-primary);
-  color: white;
-  font-size: 10px;
+  color: var(--bg-dark);
+  font-size: 11px;
   font-weight: 700;
 }
 
-.subtask-label {
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--text-primary);
+.subtask-label { color: var(--text-primary); }
+.subtask-label-done { color: var(--text-done); text-decoration: line-through; opacity: 0.5; }
+
+.detail-footer {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.subtask-label-done {
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--text-done);
-  text-decoration: line-through;
+.progress-track {
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  width: 100%;
+}
+.progress-fill {
+  height: 100%;
+  transition: width 0.3s ease;
 }
 
 .mark-done-btn {
-  font-size: 13px;
-  color: #AAAAAA;
-  cursor: pointer;
-  padding: 14px;
-  background: transparent;
+  background: rgba(255,255,255,0.05);
+  color: var(--text-secondary);
   border: none;
-  text-align: center;
-  font-family: inherit;
-  flex-shrink: 0;
-  margin-top: auto;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: var(--text-base);
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
 }
-
-.mark-done-btn:hover {
-  color: var(--text-primary);
-}
+.mark-done-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }

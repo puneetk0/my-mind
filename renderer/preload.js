@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('pond', {
   completeTask:  (id)   => ipcRenderer.invoke('tasks:complete', id),
   deleteTask:    (id)   => ipcRenderer.invoke('tasks:delete', id),
   toggleSubtask: (id)   => ipcRenderer.invoke('subtasks:toggle', id),
+  getConstructors:()    => ipcRenderer.invoke('constructors:getAvailable'),
   escape:        ()     => ipcRenderer.send('popover:escape'),
   onShow: (cb) => {
     ipcRenderer.on('popover:show', cb);

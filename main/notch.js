@@ -4,9 +4,9 @@ let pollInterval = null;
 let hideTimeout = null;
 
 // We own these values — no need to ask the OS
-const POPOVER_X_OFFSET = 170;
-const POPOVER_WIDTH = 340;
-const POPOVER_HEIGHT_OPEN = 420;
+const POPOVER_X_OFFSET = 345;
+const POPOVER_WIDTH = 690;
+const POPOVER_HEIGHT_OPEN = 460;
 
 function startNotchWatcher(win, showFn, hideFn, getVisibleFn) {
   const { width: screenWidth } = screen.getPrimaryDisplay().bounds;
@@ -20,7 +20,7 @@ const NOTCH_ZONE = {
   height: 60,  // was 40 — covers the gap between notch and popover top
 };
 
-const GRACE_MS = 400;  // was 300
+const GRACE_MS = 600;  // was 300
 
   function isCursorSafe(cx, cy) {
     const inNotch =

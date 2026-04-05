@@ -10,11 +10,12 @@ let popoverVisible = false;
 
 function createWindow() {
   const { width: screenWidth } = screen.getPrimaryDisplay().bounds;
+  const POPOVER_WIDTH = 690;
 
   win = new BrowserWindow({
-    width: 340,
+    width: POPOVER_WIDTH,
     height: 0,
-    x: Math.round(screenWidth / 2 - 170),
+    x: Math.round(screenWidth / 2 - (POPOVER_WIDTH / 2)),
     y: 0,
     frame: false,
     transparent: true,
@@ -42,14 +43,14 @@ function createWindow() {
 function showPopover() {
   if (!win || popoverVisible) return;
   popoverVisible = true;
-  win.setSize(340, 420, true);
+  win.setSize(690, 460, true);
   win.webContents.send('popover:show');
 }
 
 function hidePopover() {
   if (!win || !popoverVisible) return;
   popoverVisible = false;
-  win.setSize(340, 0, true);
+  win.setSize(690, 0, true);
   win.webContents.send('popover:hide');
 }
 
