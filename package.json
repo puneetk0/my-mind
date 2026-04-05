@@ -1,0 +1,36 @@
+{
+  "name": "pond",
+  "version": "1.0.0",
+  "description": "A notch-native todo app for macOS",
+  "main": "main/index.js",
+  "scripts": {
+    "dev": "webpack --mode development --watch & electron .",
+    "build:renderer": "webpack --mode production",
+    "build": "npm run build:renderer && electron-builder",
+    "start": "electron ."
+  },
+  "author": "Puneet",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sql.js": "^1.14.1",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.26.3",
+    "babel-loader": "^9.2.1",
+    "css-loader": "^7.1.2",
+    "electron": "^29.4.6",
+    "electron-builder": "^25.1.8",
+    "html-webpack-plugin": "^5.6.3",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1"
+  },
+  "build": {
+    "extends": "./electron-builder.config.js"
+  }
+}

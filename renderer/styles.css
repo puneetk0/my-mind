@@ -1,0 +1,391 @@
+/* ==========================================
+   Pond — Global Styles
+   ========================================== */
+
+:root {
+  --bg: #FFFFFF;
+  --card: #F8F8F8;
+  --card-border: #EBEBEB;
+  --text-primary: #1A1A1A;
+  --text-secondary: #888888;
+  --text-done: #BBBBBB;
+  --divider: #F0F0F0;
+  --btn-primary-bg: #1A1A1A;
+  --btn-primary-text: #FFFFFF;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* ==========================================
+   Home Screen
+   ========================================== */
+
+.home {
+  display: flex;
+  flex-direction: column;
+  height: 420px;
+  max-height: 420px;
+  padding: 8px;
+}
+
+.task-list {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.empty-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+/* ==========================================
+   Task Card
+   ========================================== */
+
+.task-card {
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+  font-family: inherit;
+}
+
+.task-card:hover {
+  background: #F3F3F3;
+}
+
+.task-card:active {
+  background: #EEEEEE;
+}
+
+/* ==========================================
+   Add Button (shared)
+   ========================================== */
+
+.add-button {
+  width: 100%;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+
+.add-button:hover {
+  opacity: 0.9;
+}
+
+.add-button:active {
+  opacity: 0.8;
+}
+
+.add-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ==========================================
+   Add Task Screen
+   ========================================== */
+
+.add-task {
+  display: flex;
+  flex-direction: column;
+  height: 420px;
+  max-height: 420px;
+}
+
+.add-title-input {
+  font-size: 17px;
+  font-weight: 600;
+  border: none;
+  outline: none;
+  width: 100%;
+  padding: 12px 14px;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: transparent;
+}
+
+.add-title-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.divider {
+  height: 1px;
+  background: var(--divider);
+  margin: 0 14px;
+  flex-shrink: 0;
+}
+
+.add-note-input {
+  font-size: 13px;
+  border: none;
+  outline: none;
+  resize: none;
+  min-height: 60px;
+  padding: 8px 14px;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: transparent;
+}
+
+.add-note-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.subtask-section {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding-top: 4px;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 6px 14px;
+  display: block;
+}
+
+.subtask-row-edit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+}
+
+.subtask-bullet {
+  color: #BBBBBB;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.subtask-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: transparent;
+}
+
+.subtask-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.remove-btn {
+  font-size: 16px;
+  color: #BBBBBB;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.remove-btn:hover {
+  color: var(--text-primary);
+}
+
+.add-subtask-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 6px 14px;
+  text-align: left;
+  font-family: inherit;
+}
+
+.add-subtask-btn:hover {
+  color: var(--text-primary);
+}
+
+.button-row {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  flex-shrink: 0;
+}
+
+.cancel-btn {
+  background: transparent;
+  color: var(--text-secondary);
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 12px 14px;
+  font-family: inherit;
+}
+
+.cancel-btn:hover {
+  color: var(--text-primary);
+}
+
+/* ==========================================
+   Task Detail Screen (Phase 4)
+   ========================================== */
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  height: 420px;
+  max-height: 420px;
+}
+
+.back-button {
+  font-size: 18px;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 12px 14px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+.back-button:hover {
+  opacity: 0.6;
+}
+
+.detail-title {
+  font-size: 17px;
+  font-weight: 600;
+  padding: 0 14px;
+  color: var(--text-primary);
+  word-wrap: break-word;
+}
+
+.detail-note {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 6px 14px 0;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.subtask-list {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.subtask-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 0 14px;
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid #DDDDDD;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.checkbox.checked {
+  border: none;
+  background: var(--text-primary);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.subtask-label {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-primary);
+}
+
+.subtask-label-done {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-done);
+  text-decoration: line-through;
+}
+
+.mark-done-btn {
+  font-size: 13px;
+  color: #AAAAAA;
+  cursor: pointer;
+  padding: 14px;
+  background: transparent;
+  border: none;
+  text-align: center;
+  font-family: inherit;
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.mark-done-btn:hover {
+  color: var(--text-primary);
+}
