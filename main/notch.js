@@ -28,13 +28,13 @@ const GRACE_MS = 600;  // was 300
       cx <= NOTCH_ZONE.x + NOTCH_ZONE.width &&
       cy <= NOTCH_ZONE.height;
 
-    // Only check popover bounds if it's actually open
+    // Added large padding buffers: 30px on sides, 60px on bottom
     const inPopover =
-  getVisibleFn() &&
-  cx >= popoverX &&
-  cx <= popoverX + POPOVER_WIDTH &&
-  cy >= 0 &&
-  cy <= POPOVER_HEIGHT_OPEN + 20;  
+      getVisibleFn() &&
+      cx >= popoverX - 30 &&
+      cx <= popoverX + POPOVER_WIDTH + 30 &&
+      cy >= -20 &&
+      cy <= POPOVER_HEIGHT_OPEN + 60;  
 
     return { inNotch, inPopover, safe: inNotch || inPopover };
   }

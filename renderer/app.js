@@ -50,8 +50,11 @@ function Home({ tasks, onAddClick, onTaskClick, constructors }) {
               progress = comp / task.subtasks.length;
             }
 
-            // Starts at bottom: 40px (above start line), finishes at upper bounds
-            const bottomPx = task ? Math.round(50 + (progress * 420)) : 0;
+            // Car starts exactly at bottom: 24px (same baseline as the + icon)
+            // Available track height = 460px. Car height = 26px. 
+            // End target for 100% progress = 424px (leaves 10px buffer at the top)
+            // Distance of travel = 424 - 24 = 400px.
+            const bottomPx = task ? Math.round(24 + (progress * 400)) : 24;
             const primaryColor = laneConstr ? laneConstr.primary_color : '#333';
             const carImgSrc = laneConstr ? ('../assets/cars/' + laneConstr.car_file) : '';
 
@@ -60,14 +63,14 @@ function Home({ tasks, onAddClick, onTaskClick, constructors }) {
                 key=${lane} 
                 class="lane" 
                 data-lane=${lane}
-                onClick=${() => task ? onTaskClick(task.id) : null}
+                onClick=${() => task ? onTaskClick(task.id) : onAddClick(lane)}
               >
                 ${task ? html`
                   <div 
                     class="car-img" 
                     style=${{ 
                       bottom: bottomPx + 'px',
-                      backgroundColor: primaryColor, // fallback if img fails
+                      backgroundColor: primaryColor,
                     }}
                   >
                     <img 
@@ -75,8 +78,8 @@ function Home({ tasks, onAddClick, onTaskClick, constructors }) {
                       onError=${(e) => { e.target.style.display = 'none'; }} 
                       style=${{ width: '100%', height: '100%', objectFit: 'contain' }}
                     />
-                    <div class="task-label">${task.title}</div>
                   </div>
+                  <div class="task-label">${task.title}</div>
                 ` : null}
 
                 ${!task ? html`
