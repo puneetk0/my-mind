@@ -3,18 +3,7 @@ const html = htm.bind(React.createElement);
 const { useState, useEffect, useCallback, useRef } = React;
 
 // ==========================================
-// TaskCard Component
-// ==========================================
-function TaskCard({ title, onClick }) {
-  return html`
-    <button class="task-card" onClick=${onClick}>
-      ${title}
-    </button>
-  `;
-}
-
-// ==========================================
-// Checkbox Component (pure CSS, no SVG)
+// Checkbox Component
 // ==========================================
 function Checkbox({ checked, onChange }) {
   return html`
@@ -30,71 +19,48 @@ function Checkbox({ checked, onChange }) {
 // ==========================================
 // Home Screen (Track View)
 // ==========================================
-function Home({ tasks, onAddClick, onTaskClick, constructors }) {
-  // We have 10 lanes, fixed 1 to 10
-  const lanes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-
+function Home({ tasks, constructors, onAddClick, onTaskClick }) {
   return html`
-    <div class="pond-root">
-      <div class="track-container">
-        
-        <div class="lanes-wrapper">
-          ${lanes.map(lane => {
-            const laneConstr = constructors.find(c => c.id === lane);
-            const task = tasks.find(t => t.lane === lane);
-            
-            // Calculate progress (0 to 1)
-            let progress = 0;
-            if (task && task.subtasks && task.subtasks.length > 0) {
-              const comp = task.subtasks.filter(s => s.completed).length;
-              progress = comp / task.subtasks.length;
-            }
+    <div class="lanes-wrapper">
+      ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(lane => {
+        const task = tasks.find(t => t.lane === lane);
+        const laneConstr = constructors.find(c => c.id === lane);
 
-            // Car starts exactly at bottom: 24px (+ icon baseline)
-            // Available track height = 460px. Finish line is 65px from top boundary.
-            // Finish line intersection = 460 - 65 = 395px.
-            // Target car top nose = 395px. Car height = 48px. Target bottom = 395 - 48 = 347px.
-            // Travel distance = 347 - 24 = 323px.
-            const bottomPx = task ? Math.round(24 + (progress * 323)) : 24;
-            const primaryColor = laneConstr ? laneConstr.primary_color : '#333';
-            const carImgSrc = laneConstr ? '../assets/cars/car.png' : '';
+        let progress = 0;
+        if (task && task.subtasks && task.subtasks.length > 0) {
+          const comp = task.subtasks.filter(s => s.completed).length;
+          progress = comp / task.subtasks.length;
+        }
 
-            return html`
-              <div 
-                key=${lane} 
-                class="lane" 
-                data-lane=${lane}
-                onClick=${() => task ? onTaskClick(task.id) : onAddClick(lane)}
-              >
-                ${task ? html`
-                  <div 
-                    class="car-img" 
-                    style=${{ 
-                      bottom: bottomPx + 'px'
-                    }}
-                  >
-                    <img 
-                      src=${carImgSrc} 
-                      onError=${(e) => { e.target.style.display = 'none'; }} 
-                      style=${{ width: '100%', height: '100%', objectFit: 'contain' }}
-                    />
-                  </div>
-                  <div class="task-label">${task.title}</div>
-                ` : null}
+        const bottomPx = task ? Math.round(24 + (progress * 323)) : 24;
+        const carImgSrc = laneConstr ? '../assets/cars/car.png' : '';
 
-                ${!task ? html`
-                  <button 
-                    class="add-lane-btn" 
-                    onClick=${(e) => { e.stopPropagation(); onAddClick(lane); }}
-                  >
-                    +
-                  </button>
-                ` : null}
+        return html`
+          <div
+            key=${lane}
+            class="lane"
+            data-lane=${lane}
+            onClick=${() => task ? onTaskClick(task.id) : onAddClick(lane)}
+          >
+            ${task ? html`
+              <div class="car-img" style=${{ bottom: bottomPx + 'px' }}>
+                <img
+                  src=${carImgSrc}
+                  onError=${(e) => { e.target.style.display = 'none'; }}
+                  style=${{ width: '100%', height: '100%', objectFit: 'contain' }}
+                />
               </div>
-            `;
-          })}
-        </div>
-      </div>
+              <div class="task-label">${task.title}</div>
+            ` : null}
+            ${!task ? html`
+              <button
+                class="add-lane-btn"
+                onClick=${(e) => { e.stopPropagation(); onAddClick(lane); }}
+              >+</button>
+            ` : null}
+          </div>
+        `;
+      })}
     </div>
   `;
 }
@@ -131,20 +97,13 @@ function AddTask({ goHome, constructors, preSelectedConstructorId }) {
   };
 
   const handleTitleKey = (e) => {
-    if (e.key === 'Enter') { 
-      e.preventDefault(); 
-      handleSubmit(); 
-    }
+    if (e.key === 'Enter') { e.preventDefault(); handleSubmit(); }
   };
 
   const handleSubtaskKey = (e, i) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (e.shiftKey) {
-        addSubtask();
-      } else {
-        handleSubmit();
-      }
+      if (e.shiftKey) { addSubtask(); } else { handleSubmit(); }
     } else if (e.key === 'Backspace' && subtasks[i] === '') {
       e.preventDefault();
       removeSubtask(i);
@@ -154,10 +113,9 @@ function AddTask({ goHome, constructors, preSelectedConstructorId }) {
   };
 
   const handleSubmit = async () => {
-    if (!title.trim()) { setError('Title is required'); return; }
-    if (!constructorId) { setError('Choose a car'); return; }
+    if (!title.trim()) { setError('Title required'); return; }
+    if (!constructorId) { setError('Choose a constructor'); return; }
     setError('');
-    
     await window.pond.addTask({
       title: title.trim(),
       note: note.trim() || null,
@@ -167,81 +125,110 @@ function AddTask({ goHome, constructors, preSelectedConstructorId }) {
     goHome();
   };
 
+  const selectedConstr = (constructors || []).find(c => c.id === constructorId);
+
   return html`
-    <div class="add-task">
-      <input
-        ref=${titleRef}
-        class="add-title-input"
-        type="text"
-        placeholder="Task title"
-        value=${title}
-        onInput=${(e) => setTitle(e.target.value)}
-        onKeyDown=${handleTitleKey}
-      />
+    <div class="overlay-modal">
+      <div class="add-task-garage">
 
-      <div class="divider" />
+        <!-- Left: Telemetry panel -->
+        <div class="garage-left-panel">
+          <div class="panel-top-bar" style=${{ background: selectedConstr ? selectedConstr.primary_color : 'rgba(255,255,255,0.15)' }}></div>
+          <div class="panel-eyebrow">Race Engineer — Task Brief</div>
 
-      <textarea
-        ref=${noteRef}
-        class="add-note-input"
-        placeholder="Notes (optional)"
-        value=${note}
-        onInput=${(e) => setNote(e.target.value)}
-      />
+          <div class="rpm-bar">
+            ${[...Array(12)].map((_, i) => html`
+              <div key=${i} class=${'rpm-seg' + (i < 3 ? ' green' : i < 5 ? ' yellow' : i < 7 ? ' red' : '')}></div>
+            `)}
+          </div>
 
-      <div class="divider" />
-
-      <div class="subtask-section">
-        <span class="section-label">SUBTASKS</span>
-
-        ${subtasks.map((st, i) => html`
-          <div class="subtask-row-edit" key=${i}>
-            <span class="subtask-bullet">○</span>
+          <div class="title-section">
             <input
-              ref=${(el) => { subtaskRefs.current[i] = el; }}
-              class="subtask-input"
+              ref=${titleRef}
+              class="task-title-input"
               type="text"
-              placeholder="Subtask"
-              value=${st}
-              onInput=${(e) => updateSubtask(i, e.target.value)}
-              onKeyDown=${(e) => handleSubtaskKey(e, i)}
+              placeholder="Mission name..."
+              value=${title}
+              onInput=${(e) => setTitle(e.target.value)}
+              onKeyDown=${handleTitleKey}
             />
-            <button class="remove-btn" onClick=${() => removeSubtask(i)}>×</button>
           </div>
-        `)}
 
-        <button class="add-subtask-btn" onClick=${addSubtask}>
-          + Add subtask
-        </button>
-      </div>
+          <textarea
+            ref=${noteRef}
+            class="task-note-input"
+            placeholder="Telemetry notes (optional)"
+            value=${note}
+            onInput=${(e) => setNote(e.target.value)}
+          />
 
-      <div class="divider" style=${{ margin: '12px 14px 4px' }} />
-
-      <span class="section-label">CHOOSE YOUR CAR</span>
-      
-      <div class="constructor-grid">
-        ${(constructors || []).map(c => html`
-          <div
-            key=${c.id}
-            class=${'constructor-chip ' + (c.available ? '' : 'disabled ') + (constructorId === c.id ? 'selected' : '')}
-            style=${{ backgroundColor: c.primary_color, borderColor: constructorId === c.id ? c.secondary_color : 'transparent' }}
-            onClick=${() => { if(c.available) { setConstructorId(c.id); setError(''); } }}
-          >
-            <span class="constructor-chip-label">${c.name}</span>
+          <div class="objectives-section">
+            <div class="section-eyebrow">Objectives</div>
+            <div class="subtask-scroll">
+              ${subtasks.map((st, i) => html`
+                <div class="objective-row" key=${i}>
+                  <span class="obj-bullet">○</span>
+                  <input
+                    ref=${(el) => { subtaskRefs.current[i] = el; }}
+                    class="objective-input"
+                    type="text"
+                    placeholder="Objective ${i + 1}"
+                    value=${st}
+                    onInput=${(e) => updateSubtask(i, e.target.value)}
+                    onKeyDown=${(e) => handleSubtaskKey(e, i)}
+                  />
+                  <button class="obj-remove" onClick=${() => removeSubtask(i)}>×</button>
+                </div>
+              `)}
+            </div>
+            <button class="add-objective-btn" onClick=${addSubtask}>+ Add Objective</button>
           </div>
-        `)}
-      </div>
+        </div>
 
-      ${error ? html`<div class="error-text">${error}</div>` : null}
+        <!-- Right: Garage / Constructor picker -->
+        <div class="garage-right-panel">
+          <div class="panel-top-bar" style=${{ background: 'rgba(255,255,255,0.1)' }}></div>
+          <div class="panel-eyebrow">Garage Bay — Constructor</div>
 
-      <div class="button-row">
-        <button class="cancel-btn" onClick=${goHome}>Cancel</button>
-        <button
-          class="add-button"
-          onClick=${handleSubmit}
-        >
-          Add task →
-        </button>
+          <div class="start-lights-row">
+            <div class="start-light on"></div>
+            <div class="start-light on"></div>
+            <div class="start-light on"></div>
+            <div class="start-light on"></div>
+            <div class="start-light"></div>
+            ${error ? html`<span class="garage-error-pill">${error}</span>` : html`<span class="select-team-label">Select Team</span>`}
+          </div>
+
+          <div class="constructor-grid">
+            ${(constructors || []).map(c => html`
+              <div
+                key=${c.id}
+                class=${'constructor-tile' + (!c.available ? ' tile-disabled' : '') + (constructorId === c.id ? ' tile-selected' : '')}
+                style=${{
+                  borderColor: constructorId === c.id ? c.primary_color : 'transparent',
+                  boxShadow: constructorId === c.id ? ('0 0 0 1px ' + c.primary_color + ', inset 0 0 20px rgba(0,0,0,0.3)') : 'none'
+                }}
+                onClick=${() => { if (c.available) { setConstructorId(c.id); setError(''); } }}
+              >
+                <div class="tile-color-bar" style=${{ background: c.primary_color }}></div>
+                <span class="tile-name">${c.name}</span>
+                ${!c.available ? html`<span class="tile-occupied">●</span>` : null}
+              </div>
+            `)}
+          </div>
+
+          <div class="launch-row">
+            <button class="btn-abort" onClick=${goHome}>Abort</button>
+            <button
+              class="btn-launch"
+              style=${{ background: selectedConstr ? selectedConstr.primary_color : '#ffffff' }}
+              onClick=${handleSubmit}
+            >
+              Launch ▶
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   `;
@@ -253,93 +240,189 @@ function AddTask({ goHome, constructors, preSelectedConstructorId }) {
 function TaskDetail({ task, goHome, refreshTasks, onCompleteTask, constructors }) {
   if (!task) {
     return html`
-      <div class="detail">
-        <div class="detail-header">
-          <button class="back-button" onClick=${goHome}>← Back</button>
+      <div class="overlay-modal">
+        <div class="detail-shell">
+          <div class="detail-header">
+            <button class="back-btn" onClick=${goHome}>
+              <span class="back-arrow-box">←</span>
+              Pit Lane
+            </button>
+          </div>
+          <div class="empty-state">Task lost on track.</div>
         </div>
-        <div class="empty-state">Task not found.</div>
       </div>
     `;
   }
 
   const handleToggle = async (subtaskId) => {
-    const currentSubtask = task.subtasks.find(s => s.id === subtaskId);
-    const newCompletedState = currentSubtask ? !currentSubtask.completed : true;
-    
+    const current = task.subtasks.find(s => s.id === subtaskId);
+    const newState = current ? !current.completed : true;
     await window.pond.toggleSubtask(subtaskId);
-    
-    const evaluatedSubtasks = task.subtasks.map(ch => 
-      ch.id === subtaskId ? { ...ch, completed: newCompletedState } : ch
+    const evaluated = task.subtasks.map(ch =>
+      ch.id === subtaskId ? { ...ch, completed: newState } : ch
     );
-    
-    const fullyCompleted = evaluatedSubtasks.length > 0 && evaluatedSubtasks.every(st => st.completed);
-    
-    if (fullyCompleted) {
-      onCompleteTask(task);
-    } else {
-      await refreshTasks();
-    }
+    const fullyDone = evaluated.length > 0 && evaluated.every(st => st.completed);
+    if (fullyDone) { onCompleteTask(task); } else { await refreshTasks(); }
   };
 
   const hasSubtasks = task.subtasks && task.subtasks.length > 0;
   const completedCount = hasSubtasks ? task.subtasks.filter(s => s.completed).length : 0;
   const totalCount = hasSubtasks ? task.subtasks.length : 0;
-  const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-  
+  const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+  // Sector breakdown: split subtasks into 3 roughly equal sectors
+  const s1End = Math.ceil(totalCount / 3);
+  const s2End = Math.ceil(totalCount * 2 / 3);
+  const s1Done = hasSubtasks ? task.subtasks.slice(0, s1End).filter(s => s.completed).length : 0;
+  const s2Done = hasSubtasks ? task.subtasks.slice(s1End, s2End).filter(s => s.completed).length : 0;
+  const s3Done = hasSubtasks ? task.subtasks.slice(s2End).filter(s => s.completed).length : 0;
+  const s1Total = s1End;
+  const s2Total = s2End - s1End;
+  const s3Total = totalCount - s2End;
+
+  const sectorColor = (done, total) => {
+    if (total === 0) return '#333';
+    const r = done / total;
+    if (r === 1) return '#00d066';
+    if (r > 0) return '#ffe000';
+    return 'rgba(255,255,255,0.08)';
+  };
+
+  // Circle arc
+  const radius = 35;
+  const circumference = 2 * Math.PI * radius;
+  const dashOffset = circumference - (progressPct / 100) * circumference;
+
   const laneConstr = constructors.find(c => c.id === task.constructor_id) || {};
+  const accentColor = laneConstr.primary_color || '#ffffff';
+
+  // Position display: task with most progress = P1
+  const position = 1;
 
   return html`
-    <div class="detail">
-      <div class="detail-header">
-        <button class="back-button" onClick=${goHome}>← Back</button>
-        ${laneConstr.name ? html`
-          <span class="constructor-badge" style=${{ backgroundColor: laneConstr.primary_color }}>
-            ${laneConstr.name}
-          </span>
-        ` : null}
-      </div>
+    <div class="overlay-modal">
+      <div class="detail-shell">
 
-      <h1 class="detail-title">${task.title}</h1>
-      ${task.note ? html`<p class="detail-note">${task.note}</p>` : null}
-
-      ${hasSubtasks ? html`
-        <div class="divider" style=${{ margin: '14px 14px 4px' }} />
-        <div class="section-label" style=${{ display: 'flex', justifyContent: 'space-between' }}>
-          <span>SUBTASKS</span>
-          <span>${completedCount} / ${totalCount} complete</span>
-        </div>
-        
-        <div class="subtask-list">
-          ${task.subtasks.map(st => html`
-            <div class="subtask-row" key=${st.id}>
-              <${Checkbox}
-                checked=${st.completed}
-                onChange=${() => handleToggle(st.id)}
-              />
-              <span class=${st.completed ? 'subtask-label-done' : 'subtask-label'}>
-                ${st.title}
-              </span>
-            </div>
-          `)}
-        </div>
-      ` : html`<div class="subtask-list"></div>`}
-
-      <div class="detail-footer">
-        ${hasSubtasks ? html`
-          <div class="progress-track">
-            <div 
-              class="progress-fill" 
-              style=${{ 
-                width: progressPercent + '%', 
-                backgroundColor: laneConstr.primary_color || '#fff' 
-              }} 
-            />
+        <!-- Header -->
+        <div class="detail-header">
+          <button class="back-btn" onClick=${goHome}>
+            <span class="back-arrow-box">←</span>
+            Pit Lane
+          </button>
+          <div class="lap-counter">
+            Lap ${completedCount} / ${totalCount}
           </div>
-        ` : null}
-        
-        <button class="mark-done-btn" onClick=${() => onCompleteTask(task)}>
-          Mark as done
-        </button>
+          ${laneConstr.name ? html`
+            <div class="team-badge" style=${{ borderColor: accentColor + '55', background: accentColor + '18' }}>
+              <div class="badge-pip" style=${{ background: accentColor }}></div>
+              <span class="badge-team" style=${{ color: accentColor }}>${laneConstr.name.toUpperCase()}</span>
+            </div>
+          ` : null}
+        </div>
+
+        <!-- Body -->
+        <div class="detail-body">
+
+          <!-- Left: task info + subtasks -->
+          <div class="detail-left-panel">
+            <div class="panel-top-bar" style=${{ background: accentColor }}></div>
+            <div class="detail-task-title">${task.title}</div>
+            ${task.note ? html`<p class="detail-task-note">${task.note}</p>` : null}
+
+            <div class="objectives-header">
+              <span class="section-eyebrow">Objectives</span>
+              <span class="section-eyebrow">${completedCount} / ${totalCount} complete</span>
+            </div>
+
+            <div class="detail-subtask-list">
+              ${hasSubtasks ? task.subtasks.map(st => html`
+                <div
+                  class=${'detail-st-row' + (st.completed ? ' st-done' : '')}
+                  key=${st.id}
+                  onClick=${() => handleToggle(st.id)}
+                >
+                  <div class=${'detail-chk' + (st.completed ? ' chk-filled' : '')}
+                    style=${{ borderColor: st.completed ? accentColor : 'rgba(255,255,255,0.2)', background: st.completed ? accentColor : 'transparent' }}
+                  >
+                    ${st.completed ? '✓' : ''}
+                  </div>
+                  <span class=${st.completed ? 'st-label done' : 'st-label'}>${st.title}</span>
+                </div>
+              `) : html`<div class="empty-state" style=${{ flex: 1, fontSize: '12px' }}>No objectives set.</div>`}
+            </div>
+          </div>
+
+          <!-- Right: race data -->
+          <div class="detail-right-col">
+
+            <!-- Progress circle card -->
+            <div class="race-data-card">
+              <div class="panel-top-bar" style=${{ background: 'rgba(255,255,255,0.07)' }}></div>
+              <div class="section-eyebrow">Race Progress</div>
+
+              <div class="progress-circle-wrap">
+                <svg width="90" height="90" viewBox="0 0 90 90" style=${{ transform: 'rotate(-90deg)' }}>
+                  <circle cx="45" cy="45" r=${radius} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="7"/>
+                  <circle
+                    cx="45" cy="45" r=${radius}
+                    fill="none"
+                    stroke=${accentColor}
+                    strokeWidth="7"
+                    strokeLinecap="round"
+                    strokeDasharray=${circumference}
+                    strokeDashoffset=${dashOffset}
+                    style=${{ transition: 'stroke-dashoffset 0.5s ease' }}
+                  />
+                </svg>
+                <div class="circle-label">
+                  <span class="circle-pct">${progressPct}</span>
+                  <span class="circle-unit">PCT</span>
+                </div>
+              </div>
+
+              <div class="sector-bars">
+                ${[
+                  ['S1', s1Done, s1Total],
+                  ['S2', s2Done, s2Total],
+                  ['S3', s3Done, s3Total],
+                ].map(([label, done, total]) => html`
+                  <div class="sector-row" key=${label}>
+                    <span class="sector-label">${label}</span>
+                    <div class="sector-track">
+                      <div class="sector-fill" style=${{
+                        width: (total > 0 ? Math.round((done / total) * 100) : 0) + '%',
+                        background: sectorColor(done, total)
+                      }}></div>
+                    </div>
+                  </div>
+                `)}
+              </div>
+            </div>
+
+            <!-- Stats + flag card -->
+            <div class="race-data-card flag-card">
+              <div class="panel-top-bar" style=${{ background: 'rgba(255,255,255,0.07)' }}></div>
+              <div class="pit-stats">
+                <div class="pit-stat-row">
+                  <span class="pit-key">Position</span>
+                  <span class="pit-val">P${position}</span>
+                </div>
+                <div class="pit-stat-row">
+                  <span class="pit-key">Remaining</span>
+                  <span class="pit-val">${totalCount - completedCount} obj</span>
+                </div>
+              </div>
+              <button
+                class="chequered-btn"
+                onClick=${() => onCompleteTask(task)}
+              >
+                CHEQUERED FLAG
+              </button>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </div>
   `;
@@ -375,7 +458,6 @@ function App() {
 
   useEffect(() => { refreshData(); }, [refreshData]);
 
-  // Refresh tasks when popover is shown
   useEffect(() => {
     if (window.pond && window.pond.onShow) {
       const cleanup = window.pond.onShow(() => {
@@ -394,30 +476,20 @@ function App() {
   }, [refreshData]);
 
   const handleCompleteTask = useCallback(async (task) => {
-    // 1. Go to home screen immediately to see the track
     setScreen('home');
     setSelectedTaskId(null);
-
-    // 2. Wait for DOM to render the home screen
     setTimeout(() => {
       const laneEl = document.querySelector('.lane[data-lane="' + task.lane + '"]');
       if (!laneEl) {
-         window.pond.completeTask(task.id).then(refreshData);
-         return;
+        window.pond.completeTask(task.id).then(refreshData);
+        return;
       }
-      
       const carEl = laneEl.querySelector('.car-img');
-      const colorBar = laneEl.querySelector('.lane-color-bar');
-      const constructorColor = colorBar ? colorBar.style.backgroundColor : '#fff';
-
       if (carEl) {
-        // Car drives off the top of the lane
         carEl.style.transition = 'bottom 0.4s ease-in';
-        carEl.style.bottom = '560px'; // off screen top
-
-        // Flash the lane
+        carEl.style.bottom = '560px';
         setTimeout(() => {
-          laneEl.style.backgroundColor = constructorColor;
+          laneEl.style.backgroundColor = 'rgba(255,255,255,0.15)';
           laneEl.style.transition = 'background-color 0.1s';
           setTimeout(() => {
             laneEl.style.backgroundColor = 'transparent';
@@ -430,9 +502,9 @@ function App() {
     }, 50);
   }, [refreshData]);
 
-  const goToAdd = useCallback((constructorId) => { 
+  const goToAdd = useCallback((constructorId) => {
     setIntendedConstructorId(constructorId || null);
-    setScreen('add'); 
+    setScreen('add');
   }, []);
 
   const goToDetail = useCallback((id) => {
@@ -440,53 +512,46 @@ function App() {
     setScreen('detail');
   }, []);
 
-  // Global Escape — go back or close popover
   useEffect(() => {
     const handler = (e) => {
       if (e.key === 'Escape') {
-        if (screen !== 'home') {
-          setScreen('home');
-        } else if (window.pond && window.pond.escape) {
-          window.pond.escape();
-        }
+        if (screen !== 'home') { setScreen('home'); }
+        else if (window.pond && window.pond.escape) { window.pond.escape(); }
       }
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [screen]);
 
-  if (screen === 'add') {
-    return html`<${AddTask} 
-      goHome=${goHome} 
-      constructors=${constructors} 
-      preSelectedConstructorId=${intendedConstructorId}
-    />`;
-  }
-
-  if (screen === 'detail') {
-    const task = tasks.find(t => t.id === selectedTaskId) || null;
-    return html`<${TaskDetail} 
-      task=${task} 
-      goHome=${goHome} 
-      refreshTasks=${refreshData} 
-      constructors=${constructors}
-      onCompleteTask=${handleCompleteTask}
-    />`;
-  }
-
-  // Default: home
   return html`
-    <${Home}
-      tasks=${tasks}
-      constructors=${constructors}
-      onAddClick=${goToAdd}
-      onTaskClick=${goToDetail}
-    />
+    <div class="pond-root">
+      <div class="track-container">
+        <${Home}
+          tasks=${tasks}
+          constructors=${constructors}
+          onAddClick=${goToAdd}
+          onTaskClick=${goToDetail}
+        />
+        ${screen === 'add' ? html`
+          <${AddTask}
+            goHome=${goHome}
+            constructors=${constructors}
+            preSelectedConstructorId=${intendedConstructorId}
+          />
+        ` : null}
+        ${screen === 'detail' ? html`
+          <${TaskDetail}
+            task=${tasks.find(t => t.id === selectedTaskId) || null}
+            goHome=${goHome}
+            refreshTasks=${refreshData}
+            constructors=${constructors}
+            onCompleteTask=${handleCompleteTask}
+          />
+        ` : null}
+      </div>
+    </div>
   `;
 }
 
-// ==========================================
-// Mount
-// ==========================================
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(html`<${App} />`);
