@@ -67,21 +67,23 @@ app.whenReady().then(async () => {
   createTray(togglePopover);
 
   globalShortcut.register('CommandOrControl+Shift+P', () => {
-  if (popoverVisible) {
-    pinned = false;
-    hidePopover();
-  } else {
-    pinned = true;
-    showPopover();
-    if (win) win.webContents.send('popover:pinned', true);
-  }
-});
+    if (popoverVisible) {
+      pinned = false;
+      hidePopover();
+    } else {
+      pinned = true;
+      showPopover();
+      if (win) win.webContents.send('popover:pinned', true);
+    }
+  });
+
   startNotchWatcher(win, showPopover, hidePopover, () => popoverVisible);
 
+  ipcMain.on('popover:escape', () => hidePopover());
   ipcMain.on('popover:pin', () => {
-  pinned = !pinned;
-  win.webContents.send('popover:pinned', pinned);
-});
+    pinned = !pinned;
+    if (win) win.webContents.send('popover:pinned', pinned);
+  });
 });
 
 app.on('will-quit', () => {

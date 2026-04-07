@@ -183,7 +183,6 @@ function AddTask({ goHome, constructors, preSelectedConstructorId, editTask }) {
           <div style=${{ justifySelf: 'center', display: 'flex' }}>
             ${selectedConstr ? html`
               <div class="team-badge" style=${{ borderColor: selectedConstr.primary_color + '88', background: selectedConstr.primary_color + '33' }}>
-                <div class="badge-pip" style=${{ background: selectedConstr.primary_color }}></div>
                 <span class="badge-team" style=${{ color: selectedConstr.primary_color }}>${selectedConstr.name.toUpperCase()}</span>
               </div>
             ` : null}

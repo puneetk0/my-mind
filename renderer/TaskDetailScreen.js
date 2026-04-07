@@ -154,7 +154,7 @@ const position = (() => {
           <div style=${{ justifySelf: 'center', display: 'flex' }}>
             ${laneConstr.name ? html`
               <div class="team-badge" style=${{ borderColor: accentColor + '88', background: accentColor + '33' }}>
-                <div class="badge-pip" style=${{ background: accentColor }}></div>
+               
                 <span class="badge-team" style=${{ color: accentColor }}>${laneConstr.name.toUpperCase()}</span>
               </div>
             ` : null}

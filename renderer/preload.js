@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('pond', {
   deleteTask:    (id)   => ipcRenderer.invoke('tasks:delete', id),
   toggleSubtask: (id)   => ipcRenderer.invoke('subtasks:toggle', id),
   reorderSubtasks: (taskId, newIds) => ipcRenderer.invoke('subtasks:reorder', { taskId, newIds }),
+  swapLanes:     (laneA, laneB) => ipcRenderer.invoke('tasks:swapLanes', { laneA, laneB }),
   getConstructors:()    => ipcRenderer.invoke('constructors:getAvailable'),
   escape:        ()     => ipcRenderer.send('popover:escape'),
   onShow: (cb) => {
