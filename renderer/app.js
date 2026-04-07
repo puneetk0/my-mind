@@ -123,39 +123,45 @@ function App() {
   }, [screen]);
 
   // --- Global keyboard shortcuts ---
-  useEffect(() => {
-    const handler = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
-        e.preventDefault();
-        goToAdd(null);
-        return;
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-        e.preventDefault();
-        handleSaveOrLaunch();
-        return;
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-        e.preventDefault();
-        handleSaveOrLaunch();
-        return;
-      }
-      if (e.key === 'Escape') {
-        if (celebratedTask) return;
-        if (showShortcuts) {
-          setShowShortcuts(false);
-        } else if (screen !== 'home') {
-          setScreen('home');
-          setTaskToEdit(null);
-        } else if (window.pond && window.pond.escape) {
-          window.pond.escape();
-        }
-      }
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [screen, showShortcuts, celebratedTask, goToAdd, handleSaveOrLaunch]);
+useEffect(() => {
+  const handler = (e) => {
+    const isMeta = e.metaKey || e.ctrlKey;
 
+    if (isMeta && e.key === ',') {
+      e.preventDefault();
+      setShowShortcuts(prev => !prev);
+      return;
+    }
+
+    if (isMeta && e.key === 'n') {
+      e.preventDefault();
+      if (screen === 'home' && !celebratedTask) {
+        const occupiedLanes = tasks.map(t => t.lane);
+        const freeLane = [1,2,3,4,5,6,7,8,9,10].find(l => !occupiedLanes.includes(l)) || null;
+        goToAdd(freeLane);
+      }
+      return;
+    }
+
+    if (isMeta && e.key === 's') {
+      e.preventDefault();
+      if (screen === 'add') {
+        document.dispatchEvent(new CustomEvent('pond:save-launch'));
+      }
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      if (showShortcuts) { setShowShortcuts(false); return; }
+      if (celebratedTask) { goHome(); return; }
+      if (screen !== 'home') { setScreen('home'); return; }
+      if (window.pond && window.pond.escape) { window.pond.escape(); }
+    }
+  };
+
+  document.addEventListener('keydown', handler);
+  return () => document.removeEventListener('keydown', handler);
+}, [screen, tasks, celebratedTask, showShortcuts, goToAdd, goHome]);
   // --- Render ---
   return html`
     <div class="pond-root">

@@ -150,7 +150,7 @@ body,
 
 .add-lane-btn {
   position: absolute;
-  bottom: 24px;
+  bottom: 42px;
   left: 50%;
   transform: translateX(-50%);
   width: 28px;

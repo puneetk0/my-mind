@@ -16,7 +16,7 @@ function ShortcutsModal({ onClose }) {
       <div class="shortcuts-panel" onClick=${(e) => e.stopPropagation()}>
         <div class="detail-header">
           <button class="back-btn" onClick=${onClose}>
-            <span class="back-arrow-box">←</span>
+            <span class="back-arrow-box">X</span>
             Back to Track
           </button>
         </div>
@@ -29,7 +29,6 @@ function ShortcutsModal({ onClose }) {
             </div>
           `)}
         </div>
-        <div class="shortcuts-footer">⌘ + , to close this anytime</div>
       </div>
     </div>
   `;
