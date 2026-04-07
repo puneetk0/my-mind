@@ -7,6 +7,7 @@ function registerHandlers() {
   ipcMain.handle('tasks:complete', (_e, id) => db.completeTask(id));
   ipcMain.handle('tasks:delete', (_e, id) => db.deleteTask(id));
   ipcMain.handle('subtasks:toggle', (_e, id) => db.toggleSubtask(id));
+  ipcMain.handle('subtasks:reorder', (_e, { taskId, newIds }) => db.reorderSubtasks(taskId, newIds));
   ipcMain.handle('tasks:update', (_e, data) => db.updateTask(data));
   ipcMain.handle('constructors:getAvailable', () => db.getAvailableConstructors());
 }

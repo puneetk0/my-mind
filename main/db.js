@@ -164,6 +164,49 @@ function toggleSubtask(id) {
   return { completed: r.length ? Boolean(r[0].values[0][0]) : false };
 }
 
+function swapLanes(laneA, laneB) {
+  try {
+    db.run('BEGIN TRANSACTION');
+    
+    const rA = db.exec('SELECT id FROM tasks WHERE lane = ? AND completed = 0', [laneA]);
+    const idA = rA.length && rA[0].values.length ? rA[0].values[0][0] : null;
+
+    const rB = db.exec('SELECT id FROM tasks WHERE lane = ? AND completed = 0', [laneB]);
+    const idB = rB.length && rB[0].values.length ? rB[0].values[0][0] : null;
+
+    if (idA) {
+      db.run('UPDATE tasks SET constructor_id = ?, lane = ? WHERE id = ?', [laneB, laneB, idA]);
+    }
+    if (idB) {
+      db.run('UPDATE tasks SET constructor_id = ?, lane = ? WHERE id = ?', [laneA, laneA, idB]);
+    }
+    
+    db.run('COMMIT');
+    save();
+    return { ok: true };
+  } catch(err) {
+    db.run('ROLLBACK');
+    console.error('Swap lanes failed', err);
+    return { ok: false };
+  }
+}
+
+function reorderSubtasks(taskId, newIds) {
+  try {
+    db.run('BEGIN TRANSACTION');
+    newIds.forEach((id, index) => {
+      db.run('UPDATE subtasks SET position = ? WHERE id = ? AND task_id = ?', [index, id, taskId]);
+    });
+    db.run('COMMIT');
+    save();
+    return { ok: true };
+  } catch(err) {
+    db.run('ROLLBACK');
+    console.error('Reorder subtasks failed', err);
+    return { ok: false };
+  }
+}
+
 function close() { if (db) { save(); db.close(); } }
 
-module.exports = { init, getAllTasks, addTask, updateTask, completeTask, deleteTask, toggleSubtask, getAvailableConstructors, close };
+module.exports = { init, getAllTasks, addTask, updateTask, completeTask, deleteTask, toggleSubtask, reorderSubtasks, getAvailableConstructors, swapLanes, close };

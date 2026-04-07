@@ -14,9 +14,15 @@
   <!-- HTM — JSX-like tagged templates, no build step -->
   <script src="https://unpkg.com/htm@3/dist/htm.umd.js"></script>
   
-  <!-- Confetti for Phase 3.3 -->
+  <!-- Confetti for celebrations -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
+  <!-- App scripts — loaded in dependency order -->
+  <script src="globals.js"></script>
+  <script src="HomeScreen.js"></script>
+  <script src="AddTaskScreen.js"></script>
+  <script src="TaskDetailScreen.js"></script>
+  <script src="Overlays.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
