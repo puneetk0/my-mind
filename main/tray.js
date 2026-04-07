@@ -1,7 +1,10 @@
-const { Tray, Menu, nativeImage } = require('electron');
+const { Tray, Menu, nativeImage, shell } = require('electron');
 const path = require('path');
 
 let tray = null;
+
+const FEEDBACK_URL = 'https://instagram.com/puneet.25_'; // 🔁 Replace
+const GITHUB_URL = 'https://github.com/puneetk0';      // 🔁 Replace
 
 function createTray(toggleFn) {
   const iconPath = path.join(__dirname, '..', 'assets', 'tray-icon.png');
@@ -18,9 +21,10 @@ function createTray(toggleFn) {
   tray.setToolTip('Pond');
 
   const contextMenu = Menu.buildFromTemplate([
-    { label: 'Toggle Pond', click: toggleFn },
+    { label: 'Give Feedback', click: () => shell.openExternal(FEEDBACK_URL) },
+    { label: 'GitHub', click: () => shell.openExternal(GITHUB_URL) },
     { type: 'separator' },
-    { label: 'Quit', click: () => require('electron').app.quit() },
+    { label: 'Quit Pond', click: () => require('electron').app.quit() },
   ]);
 
   tray.setContextMenu(contextMenu);

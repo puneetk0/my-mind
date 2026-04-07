@@ -6,16 +6,15 @@
   "scripts": {
     "dev": "webpack --mode development --watch & electron .",
     "build:renderer": "webpack --mode production",
-    "build": "npm run build:renderer && electron-builder",
+    "build": "electron-builder --mac --universal",
     "start": "electron ."
   },
   "author": "Puneet",
   "license": "MIT",
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "sql.js": "^1.14.1",
-    "uuid": "^11.1.0"
+    "canvas-confetti": "^1.9.4",
+    "htm": "^3.1.1",
+    "sql.js": "^1.14.1"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
@@ -26,11 +25,37 @@
     "electron": "^29.4.6",
     "electron-builder": "^25.1.8",
     "html-webpack-plugin": "^5.6.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "style-loader": "^4.0.0",
     "webpack": "^5.97.1",
     "webpack-cli": "^6.0.1"
   },
   "build": {
-    "extends": "./electron-builder.config.js"
+    "appId": "com.puneet.pond",
+    "productName": "Pond",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "assets/track-bg.png",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        }
+      ]
+    },
+    "files": [
+      "main/**",
+      "renderer/dist/**",
+      "renderer/preload.js",
+      "assets/**",
+      "package.json",
+      "node_modules/sql.js/**"
+    ],
+    "directories": {
+      "output": "dist"
+    }
   }
 }

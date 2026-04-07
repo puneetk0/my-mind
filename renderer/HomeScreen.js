@@ -1,3 +1,7 @@
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import htm from 'htm';
+const html = htm.bind(React.createElement);
+
 // ==========================================
 // Home Screen (Track View)
 // ==========================================
@@ -31,7 +35,7 @@ const handlePin = () => {
 
         let bottomPx = laneTask ? Math.round(24 + (progress * 323)) : 24;
         if (isFinishingLane && finishing.offscreen) bottomPx = 560;
-        const carImgSrc = laneConstr ? '../assets/cars/car' + laneConstr.id + '.png' : '';
+        const carImgSrc = laneConstr ? '../../assets/cars/car' + laneConstr.id + '.png' : '';
 
         return html`
           <div
@@ -100,3 +104,5 @@ const handlePin = () => {
     </div>
   `;
 }
+
+export default Home;

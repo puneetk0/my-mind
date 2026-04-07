@@ -20,6 +20,7 @@ function createWindow() {
     y: 0,
     frame: false,
     transparent: true,
+    backgroundImage: '#00000000',
     resizable: false,
     hasShadow: true,
     vibrancy: 'under-window',
@@ -37,7 +38,7 @@ function createWindow() {
   win.setAlwaysOnTop(true, 'floating');
   win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
-  win.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
+  win.loadFile(path.join(__dirname, '..', 'renderer', 'dist', 'index.html'));
   win.showInactive();
 }
 

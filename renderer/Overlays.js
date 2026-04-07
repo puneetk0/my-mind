@@ -1,3 +1,7 @@
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import htm from 'htm';
+const html = htm.bind(React.createElement);
+
 // ==========================================
 // Shortcuts Modal
 // ==========================================
@@ -58,3 +62,5 @@ function CelebrationOverlay({ task, onClose, onAdd }) {
     </div>
   `;
 }
+
+export { CelebrationOverlay, ShortcutsModal };

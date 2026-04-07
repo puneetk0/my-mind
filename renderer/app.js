@@ -1,3 +1,16 @@
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import ReactDOM from 'react-dom/client';
+import htm from 'htm';
+import './styles.css';
+import Home from './HomeScreen';
+import AddTask from './AddTaskScreen';
+import TaskDetail from './TaskDetailScreen';
+import { CelebrationOverlay, ShortcutsModal } from './Overlays';
+import confetti from 'canvas-confetti';
+
+window.confetti = confetti;
+const html = htm.bind(React.createElement);
+
 
 // App Root
 // ==========================================
@@ -44,13 +57,12 @@ function App() {
   useEffect(() => {
     if (window.pond && window.pond.onShow) {
       const cleanup = window.pond.onShow(() => {
-        refreshData();
         setScreen('home');
         setSelectedTaskId(null);
       });
       return cleanup;
     }
-  }, [refreshData]);
+  }, []);
 
   // --- Navigation ---
   const goHome = useCallback(() => {

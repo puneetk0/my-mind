@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const { app } = require('electron');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 const initSqlJs = require('sql.js/dist/sql-asm.js');
 
 let db;
@@ -170,7 +170,7 @@ function addTask({ title, note, subtasks, constructor_id }) {
   if (!constructor_id) throw new Error('constructor_id is required');
 
   return _transaction(() => {
-    const taskId = uuidv4();
+    const taskId = randomUUID();
     const now = Date.now();
     const maxPos = _row('SELECT MAX(position) FROM tasks WHERE completed = 0');
     const pos = (maxPos && maxPos[0] !== null ? maxPos[0] : -1) + 1;
@@ -187,7 +187,7 @@ function addTask({ title, note, subtasks, constructor_id }) {
         if (t) {
           db.run(
             `INSERT INTO subtasks (id, task_id, title, completed, position) VALUES (?, ?, ?, 0, ?)`,
-            [uuidv4(), taskId, t, i]
+            [randomUUID(), taskId, t, i]
           );
         }
       });
@@ -213,7 +213,7 @@ function updateTask({ id, title, note, subtasks, constructor_id }) {
       subtasks.forEach((st, i) => {
         const t = (typeof st === 'string' ? st : st.title || '').trim();
         if (t) {
-          const stId = (st && st.id) ? st.id : uuidv4();
+          const stId = (st && st.id) ? st.id : randomUUID();
           db.run(
             'INSERT INTO subtasks (id, task_id, title, completed, position) VALUES (?, ?, ?, ?, ?)',
             [stId, id, t, st.completed ? 1 : 0, i]
