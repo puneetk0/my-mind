@@ -117,13 +117,14 @@ body,
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  width: 68px;
-  height: 68px;
+  width: 56px;
+  height: 56px;
   transition: bottom 0.6s cubic-bezier(0.25, 1, 0.5, 1), left 0.6s cubic-bezier(0.25, 1, 0.5, 1);
   z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 12px;
 }
 
 .task-label {
@@ -408,25 +409,25 @@ body,
 }
 
 .pin-btn {
-  background: transparent;
-  border: none;
-  font-size: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  font-size: 9px;
   cursor: pointer;
   transition: opacity 0.15s;
-  padding: 0;
+  padding: 4px 10px;
   line-height: 1;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 10px;
-  font-weight: 600;
-  cursor: pointer;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
   transition: color 0.2s;
 }
 
 .pin-btn:hover {
-  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.08);
   color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .pin-btn.pinned {
@@ -1107,53 +1108,101 @@ body,
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 30px;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  height: 36px;
+  background: rgba(10, 10, 10, 0.854);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 15px;
+  padding: 0 16px;
   border-bottom-left-radius: 14px;
   border-bottom-right-radius: 14px;
   z-index: 10;
   box-sizing: border-box;
   font-family: inherit;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.footer-left,
+.footer-center,
+.footer-right {
+  display: flex;
+  align-items: center;
+}
+
+.footer-left {
+  flex: 1;
+  justify-content: flex-start;
+}
+
+.footer-center {
+  flex: 1;
+  justify-content: center;
+}
+
+.footer-right {
+  flex: 1;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 .watermark {
-  color: rgba(255, 255, 255, 0.3);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
 }
 
 .shortcuts-trigger {
-  background: transparent;
-  border: none;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 10px;
-  font-weight: 600;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 9px;
+  font-weight: 700;
   cursor: pointer;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: color 0.2s;
-  padding: 0;
-}
-
-.pin-diff {
-  display: flex;
-  gap: 16px;
+  letter-spacing: 1.2px;
+  transition: all 0.2s;
+  padding: 4px 10px;
 }
 
 .shortcuts-trigger:hover {
+  background: rgba(255, 255, 255, 0.08);
   color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.social-links {
+  display: flex;
+  gap: 10px;
+}
+
+.social-link {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 9px;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: color 0.2s;
+}
+
+.social-link:hover {
+  color: #fff;
+}
+
+.footer-divider {
+  width: 1px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Track modifications to reserve 30px */
 .track-container {
-  padding-bottom: 30px;
+  padding-bottom: 36px;
 }
 
 /* Shortcuts Modal Container */
@@ -1328,4 +1377,159 @@ body,
     transform: scale(1);
     opacity: 1;
   }
+}
+
+/* ==========================================
+   Car Carousel Selection
+   ========================================== */
+.car-carousel-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  border-radius: 8px;
+  padding: 0 4px;
+  margin-top: 4px;
+  height: 44px;
+}
+
+.carousel-arrow-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #fff;
+  width: 24px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  font-size: 10px;
+  z-index: 2;
+}
+
+.carousel-arrow-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}
+
+.carousel-display {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: 100%;
+}
+
+.carousel-img {
+  position: absolute;
+  width: 24px;
+  height: auto;
+  object-fit: contain;
+  transform: rotate(90deg) scale(2.2);
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
+  animation: slideFadeIn 0.3s ease-out;
+}
+
+@keyframes slideFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) rotate(90deg) scale(2.2);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(90deg) scale(2.2);
+  }
+}
+
+.carousel-selection-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin-top: 4px;
+}
+
+.btn-choose-car {
+  padding: 6px 12px;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  text-shadow: none;
+  min-height: 28px;
+}
+
+.btn-choose-car:not(.btn-car-disabled):hover {
+  transform: translateY(-1px);
+}
+
+.btn-choose-car.btn-car-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+}
+
+/* ==========================================
+   Smart Notes
+   ========================================== */
+.smart-note-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 80px;
+}
+
+.task-note-view {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 7px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  padding: 12px 14px;
+  overflow-y: auto;
+  cursor: text;
+  line-height: 1.4;
+  transition: border-color 0.3s;
+}
+
+.task-note-view:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.task-note-view.empty-note {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.task-note-input.editing {
+  height: 100%;
+  background: rgba(20, 20, 20, 0.96);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  font-size: 13px;
+  padding: 12px 14px;
+}
+
+.smart-note-link {
+  color: #5ab2ff;
+  text-decoration: underline;
+  text-decoration-color: rgba(90, 178, 255, 0.4);
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color 0.15s, text-decoration-color 0.15s;
+}
+
+.smart-note-link:hover {
+  color: #aed9ff;
+  text-decoration-color: #aed9ff;
 }

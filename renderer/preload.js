@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('pond', {
   reorderSubtasks: (taskId, newIds) => ipcRenderer.invoke('subtasks:reorder', { taskId, newIds }),
   swapLanes:     (laneA, laneB) => ipcRenderer.invoke('tasks:swapLanes', { laneA, laneB }),
   getConstructors:()    => ipcRenderer.invoke('constructors:getAvailable'),
+  openExternal:  (url)  => ipcRenderer.invoke('util:openExternal', url),
   escape:        ()     => ipcRenderer.send('popover:escape'),
   onShow: (cb) => {
     ipcRenderer.on('popover:show', cb);

@@ -67,15 +67,12 @@ app.whenReady().then(async () => {
   createWindow();
   createTray(togglePopover);
 
-  globalShortcut.register('CommandOrControl+Shift+P', () => {
-    if (popoverVisible) {
-      pinned = false;
-      hidePopover();
-    } else {
-      pinned = true;
+  globalShortcut.register('CommandOrControl+Shift+L', () => {
+    pinned = !pinned;
+    if (pinned) {
       showPopover();
-      if (win) win.webContents.send('popover:pinned', true);
     }
+    if (win) win.webContents.send('popover:pinned', pinned);
   });
 
   startNotchWatcher(win, showPopover, hidePopover, () => popoverVisible);

@@ -74,16 +74,29 @@ function TaskDetail({ task, tasks, goHome, goToAdd, refreshTasks, onCompleteTask
     setDragOverItemIndex(null);
   };
 
-  // --- Subtask toggle ---
   const handleToggle = async (subtaskId) => {
     const current = localSubtasks.find(s => s.id === subtaskId);
     const newState = current ? !current.completed : true;
-    await window.pond.toggleSubtask(subtaskId);
     
-    const evaluated = localSubtasks.map(ch =>
+    // Sort local state immediately so completed goes to bottom
+    let evaluated = localSubtasks.map(ch =>
       ch.id === subtaskId ? { ...ch, completed: newState } : ch
     );
+    evaluated = [...evaluated].sort((a, b) => {
+      if (a.completed && !b.completed) return 1;
+      if (!a.completed && b.completed) return -1;
+      return 0;
+    });
     setLocalSubtasks(evaluated);
+
+    // Persist completion state
+    await window.pond.toggleSubtask(subtaskId);
+    
+    // Persist new ordering so it stays at the bottom
+    const newIds = evaluated.map(s => s.id);
+    if (window.pond.reorderSubtasks) {
+      await window.pond.reorderSubtasks(task.id, newIds);
+    }
     
     const fullyDone = evaluated.length > 0 && evaluated.every(st => st.completed);
     if (fullyDone) { onCompleteTask(task); } else { await refreshTasks(); }
@@ -129,8 +142,9 @@ function TaskDetail({ task, tasks, goHome, goToAdd, refreshTasks, onCompleteTask
   const laneConstr = constructors.find(c => c.id === task.constructor_id) || {};
   const accentColor = laneConstr.primary_color || '#ffffff';
 const position = (() => {
-  if (!tasks || tasks.length === 0) return 1;
-  const ranked = [...tasks].sort((a, b) => {
+  const activeTasks = tasks ? tasks.filter(t => t.lane >= 1 && t.lane <= 10) : [];
+  if (!activeTasks || activeTasks.length === 0) return 1;
+  const ranked = [...activeTasks].sort((a, b) => {
     const pctA = a.subtasks.length > 0
       ? a.subtasks.filter(s => s.completed).length / a.subtasks.length
       : 0;
@@ -139,7 +153,8 @@ const position = (() => {
       : 0;
     return pctB - pctA;
   });
-  return ranked.findIndex(t => t.id === task.id) + 1;
+  const idx = ranked.findIndex(t => t.id === task.id);
+  return idx !== -1 ? idx + 1 : 1;
 })();
 
   // --- Render ---

@@ -11,6 +11,10 @@ function registerHandlers() {
   ipcMain.handle('subtasks:toggle',             (_e, id)     => db.toggleSubtask(id));
   ipcMain.handle('subtasks:reorder',            (_e, {taskId, newIds}) => db.reorderSubtasks(taskId, newIds));
   ipcMain.handle('constructors:getAvailable',   ()           => db.getAvailableConstructors());
+  ipcMain.handle('util:openExternal',           (_e, url)    => {
+    const { shell } = require('electron');
+    shell.openExternal(url);
+  });
 }
 
 module.exports = { registerHandlers };

@@ -88,19 +88,31 @@ const handlePin = () => {
       })}
     </div>
     <div class="home-footer">
-      <span class="watermark">Made by Puneet Kathuria</span>
-      <div class="pin-diff">
-      <button class="shortcuts-trigger" onClick=${onShortcutsClick}>
-  ⌘ Shortcuts
-</button>
-      <button 
-  class=${'pin-btn' + (pinned ? ' pinned' : '')} 
-  onClick=${handlePin}
-  title=${pinned ? 'Unpin' : 'Pin open'}
->
-  ${pinned ? 'Unpin' : 'Pin'}
-</button>
-</div>
+      <div class="footer-left">
+        <span class="watermark">Made by Puneet Kathuria</span>
+      </div>
+      
+      <div class="footer-center">
+
+         <div class="social-links">
+          <a class="social-link" href="#" onClick=${(e) => { e.preventDefault(); window.pond.openExternal('https://linkedin.com'); }}>LinkedIn</a>
+          <a class="social-link" href="#" onClick=${(e) => { e.preventDefault(); window.pond.openExternal('https://github.com'); }}>GitHub</a>
+          <a class="social-link" href="#" onClick=${(e) => { e.preventDefault(); window.pond.openExternal('https://github.com'); }}>Feedback</a>
+        </div>
+      </div>
+
+      <div class="footer-right">
+       <button class="shortcuts-trigger" onClick=${onShortcutsClick}>
+          ⌘ Shortcuts
+        </button>
+        <button 
+          class=${'pin-btn' + (pinned ? ' pinned' : '')} 
+          onClick=${handlePin}
+          title=${pinned ? 'Unpin' : 'Pin open'}
+        >
+          ${pinned ? 'Unpin' : 'Pin'}
+        </button>
+      </div>
     </div>
   `;
 }

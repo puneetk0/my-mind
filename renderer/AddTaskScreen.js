@@ -16,6 +16,22 @@ function AddTask({ goHome, constructors, preSelectedConstructorId, editTask }) {
   });
   const [constructorId, setConstructorId] = useState(editTask ? editTask.constructor_id : (preSelectedConstructorId || null));
   const [error, setError] = useState('');
+  
+  const [noteFocused, setNoteFocused] = useState(false);
+  const [carouselIndex, setCarouselIndex] = useState(() => {
+    if (constructors && constructors.length > 0) {
+      if (editTask && editTask.constructor_id) {
+        const idx = constructors.findIndex(c => c.id === editTask.constructor_id);
+        return idx >= 0 ? idx : 0;
+      }
+      if (preSelectedConstructorId) {
+        const idx = constructors.findIndex(c => c.id === preSelectedConstructorId);
+        return idx >= 0 ? idx : 0;
+      }
+    }
+    return 0;
+  });
+
   const titleRef = useRef(null);
   const noteRef = useRef(null);
   const subtaskRefs = useRef([]);
@@ -138,13 +154,32 @@ function AddTask({ goHome, constructors, preSelectedConstructorId, editTask }) {
     goHome();
   }, [title, note, subtasks, constructorId, editTask, goHome]);
 
-  const selectedConstr = (constructors || []).find(c => c.id === constructorId);
+  // --- Smart Note Formatter ---
+  const formatNoteHTML = (text) => {
+    if (!text) return '';
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+    return parts.map((part, i) => {
+      if (part.match(urlRegex)) {
+        return html`<a key=${i} class="smart-note-link" href="#" onClick=${(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (window.pond && window.pond.openExternal) {
+            window.pond.openExternal(part);
+          }
+        }}>${part}</a>`;
+      }
+      return html`<span key=${i}>${part}</span>`;
+    });
+  };
+
+  const selectedConstr = constructors && constructors.length > 0 ? constructors[carouselIndex] : null;
 
   // --- Objectives sub-template ---
   const objectivesContent = html`
     <div class="objectives-section">
       <div class="section-eyebrow">Objectives</div>
-      <div class=${'subtask-scroll' + (editTask ? ' edit-spacing' : '')}>
+      <div class="subtask-scroll">
         ${subtasks.map((st, i) => html`
           <div class="objective-row" key=${st.id || i}
                draggable="true"
@@ -185,9 +220,14 @@ function AddTask({ goHome, constructors, preSelectedConstructorId, editTask }) {
             </button>
           </div>
           <div style=${{ justifySelf: 'center', display: 'flex' }}>
-            ${selectedConstr ? html`
-              <div class="team-badge" style=${{ borderColor: selectedConstr.primary_color + '88', background: selectedConstr.primary_color + '33' }}>
-                <span class="badge-team" style=${{ color: selectedConstr.primary_color }}>${selectedConstr.name.toUpperCase()}</span>
+            ${constructorId ? html`
+              <div class="team-badge" style=${{ 
+                borderColor: ((constructors || []).find(c => c.id === constructorId)?.primary_color || '#fff') + '88', 
+                background: ((constructors || []).find(c => c.id === constructorId)?.primary_color || '#fff') + '33' 
+              }}>
+                <span class="badge-team" style=${{ color: ((constructors || []).find(c => c.id === constructorId)?.primary_color || '#fff') }}>
+                  ${((constructors || []).find(c => c.id === constructorId)?.name || '').toUpperCase()}
+                </span>
               </div>
             ` : null}
           </div>
@@ -196,95 +236,101 @@ function AddTask({ goHome, constructors, preSelectedConstructorId, editTask }) {
 
         <div class="add-task-garage">
 
-        <!-- Left: Telemetry panel -->
-        <div class="garage-left-panel">
-          <div class="panel-eyebrow">Race Engineer — Task Brief</div>
+          <!-- Left: Information & Constructor Picker -->
+          <div class="garage-left-panel" style=${{ flex: 1.4, paddingRight: '20px' }}>
+            <div class="panel-eyebrow">Race Engineer — Task Brief</div>
 
-          <div class="title-section">
-            <input
-              ref=${titleRef}
-              class="task-title-input"
-              type="text"
-              placeholder="Mission name..."
-              value=${title}
-              onInput=${(e) => setTitle(e.target.value)}
-              onKeyDown=${handleTitleKey}
-            />
+            <div class="title-section">
+              <input
+                ref=${titleRef}
+                class="task-title-input"
+                type="text"
+                placeholder="Mission name..."
+                value=${title}
+                onInput=${(e) => setTitle(e.target.value)}
+                onKeyDown=${handleTitleKey}
+              />
+            </div>
+
+            <!-- Smart Notes -->
+            <div class="note-wrapper smart-note-container" 
+                 onClick=${() => { if (!noteFocused) { setNoteFocused(true); setTimeout(() => noteRef.current && noteRef.current.focus(), 50); } }}>
+              ${noteFocused ? html`
+                <textarea
+                  ref=${noteRef}
+                  class="task-note-input editing"
+                  placeholder="Telemetry notes (optional, links will be clickable)"
+                  value=${note}
+                  onInput=${(e) => setNote(e.target.value)}
+                  onBlur=${() => setNoteFocused(false)}
+                />
+              ` : html`
+                <div class=${'task-note-view ' + (!note ? 'empty-note' : '')}>
+                  ${note ? formatNoteHTML(note) : 'Telemetry notes (optional, links will be clickable)'}
+                </div>
+              `}
+            </div>
+
+            <!-- Car Carousel Picker -->
+            <div class="car-carousel-container">
+              <button class="carousel-arrow-btn" onClick=${() => setCarouselIndex(prev => prev > 0 ? prev - 1 : constructors.length - 1)}>
+                ‹
+              </button>
+              
+              <div class="carousel-display">
+                ${selectedConstr ? html`
+                  <img src=${'../../assets/cars/car' + selectedConstr.id + '.png'} class="carousel-img" />
+                ` : null}
+              </div>
+
+              <button class="carousel-arrow-btn" onClick=${() => setCarouselIndex(prev => prev < constructors.length - 1 ? prev + 1 : 0)}>
+                ›
+              </button>
+            </div>
+            
+            <div class="carousel-selection-row">
+              ${error ? html`<div class="garage-error-pill" style=${{ marginTop: '0', marginBottom: '8px' }}>${error}</div>` : null}
+              ${selectedConstr ? html`
+                <button
+                  class=${'btn-choose-car ' + (selectedConstr.available || (editTask && editTask.constructor_id === selectedConstr.id) ? '' : 'btn-car-disabled')}
+                  style=${{ 
+                    background: constructorId === selectedConstr.id ? selectedConstr.primary_color + '22' : 'rgba(255,255,255,0.03)',
+                    color: constructorId === selectedConstr.id ? '#fff' : (selectedConstr.available || (editTask && editTask.constructor_id === selectedConstr.id) ? selectedConstr.primary_color : '#888'),
+                    border: '1px solid ' + ((selectedConstr.available || (editTask && editTask.constructor_id === selectedConstr.id)) ? selectedConstr.primary_color + '55' : 'rgba(255,255,255,0.1)'),
+                    boxShadow: constructorId === selectedConstr.id ? '0 0 10px ' + selectedConstr.primary_color + '33' : 'none'
+                  }}
+                  onClick=${() => {
+                    if (selectedConstr.available || (editTask && editTask.constructor_id === selectedConstr.id)) {
+                      setConstructorId(selectedConstr.id);
+                      setError('');
+                    }
+                  }}
+                >
+                  ${constructorId === selectedConstr.id ? '✓ Selected: ' + selectedConstr.name : 
+                    (!selectedConstr.available && !(editTask && editTask.constructor_id === selectedConstr.id) ? 'Garage Occupied' : 'Select ' + selectedConstr.name)}
+                </button>
+              ` : null}
+            </div>
           </div>
 
-          <div class="note-wrapper" style=${editTask ? { flex: 1, minHeight: 0, display: 'flex' } : {}}>
-            <textarea
-              ref=${noteRef}
-              class="task-note-input"
-              placeholder="Telemetry notes (optional)"
-              value=${note}
-              onInput=${(e) => setNote(e.target.value)}
-              style=${editTask ? { flex: 1, height: '100%', resize: 'none' } : {}}
-            />
-            <span class="note-close-btn" onMouseDown=${(e) => { e.preventDefault(); noteRef.current.blur(); }}>DONE</span>
-          </div>
-
-          ${!editTask ? objectivesContent : null}
-          
-          ${editTask ? html`
+          <!-- Right: Objectives & Controls -->
+          <div class="garage-right-panel">
+            <div class="panel-top-bar" style=${{ background: 'rgba(255,255,255,0.1)' }}></div>
+            
+            ${objectivesContent}
+            
+            <!-- Launch Controls -->
             <div class="launch-row" style=${{ marginTop: 'auto' }}>
               <button class="btn-abort" onClick=${goHome}>Abort</button>
               <button
                 class="btn-launch"
-                style=${{ background: selectedConstr ? selectedConstr.primary_color : '#ffffff' }}
+                style=${{ background: constructorId ? ((constructors || []).find(c => c.id === constructorId)?.primary_color || '#fff') : '#ffffff' }}
                 onClick=${handleSubmit}
               >
-                Save Pit Stop ▶
+                ${editTask ? 'Save Pit Stop ▶' : 'Launch ▶'}
               </button>
             </div>
-          ` : null}
-        </div>
-
-        ${editTask ? html`
-          <div class="garage-right-panel" style=${{ padding: 0, border: 'none', background: 'transparent' }}>
-            <div class="garage-left-panel" style=${{ flex: 1, margin: 0 }}>
-              ${objectivesContent}
-            </div>
           </div>
-        ` : html`
-        <!-- Right: Garage / Constructor picker -->
-        <div class="garage-right-panel">
-          <div class="panel-top-bar" style=${{ background: 'rgba(255,255,255,0.1)' }}></div>
-          <div class="panel-eyebrow">Garage Bay — Constructor</div>
-
-          ${error ? html`<div class="garage-error-pill" style=${{ marginTop: '10px' }}>${error}</div>` : null}
-
-          <div class="constructor-grid">
-            ${(constructors || []).map(c => html`
-              <div
-                key=${c.id}
-                class=${'constructor-tile' + (!c.available ? ' tile-disabled' : '') + (constructorId === c.id ? ' tile-selected' : '')}
-                style=${{
-                  borderColor: constructorId === c.id ? c.primary_color : 'transparent',
-                  boxShadow: constructorId === c.id ? ('0 0 0 1px ' + c.primary_color + ', inset 0 0 20px rgba(0,0,0,0.3)') : 'none',
-                  cursor: 'pointer'
-                }}
-                onClick=${() => { if (c.available) { setConstructorId(c.id); setError(''); } }}
-              >
-                <div class="tile-color-bar" style=${{ background: c.primary_color }}></div>
-                <span class="tile-name">${c.name}</span>
-                ${!c.available ? html`<span class="tile-occupied">●</span>` : null}
-              </div>
-            `)}
-          </div>
-
-          <div class="launch-row">
-            <button class="btn-abort" onClick=${goHome}>Abort</button>
-            <button
-              class="btn-launch"
-              style=${{ background: selectedConstr ? selectedConstr.primary_color : '#ffffff' }}
-              onClick=${handleSubmit}
-            >
-              Launch ▶
-            </button>
-          </div>
-        </div>
-        `}
 
         </div>
       </div>

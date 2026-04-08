@@ -1,12 +1,12 @@
 {
-  "name": "pond",
+  "name": "camber",
   "version": "1.0.0",
   "description": "A notch-native todo app for macOS",
   "main": "main/index.js",
   "scripts": {
     "dev": "webpack --mode development --watch & electron .",
     "build:renderer": "webpack --mode production",
-    "build": "electron-builder --mac --universal",
+    "build": "npm run build:renderer && electron-builder --mac --universal",
     "start": "electron ."
   },
   "author": "Puneet",
@@ -32,11 +32,11 @@
     "webpack-cli": "^6.0.1"
   },
   "build": {
-    "appId": "com.puneet.pond",
-    "productName": "Pond",
+    "appId": "com.puneet.camber",
+    "productName": "Camber",
     "mac": {
       "category": "public.app-category.productivity",
-      "icon": "assets/track-bg.png",
+      "icon": "assets/camber-logo.png",
       "target": [
         {
           "target": "dmg",
