@@ -97,7 +97,7 @@ const handlePin = () => {
          <div class="social-links">
           <a class="social-link" href="#" onClick=${(e) => { e.preventDefault(); window.pond.openExternal('https://www.linkedin.com/in/puneet-kathuria-33a296220/'); }}>LinkedIn</a>
           <a class="social-link" href="#" onClick=${(e) => { e.preventDefault(); window.pond.openExternal('https://github.com/puneetk0'); }}>GitHub</a>
-          <a class="social-link" href="#" onClick=${(e) => { e.preventDefault(); window.pond.openExternal('https://github.com/puneetk0/camber'); }}>Feedback</a>
+          <a class="social-link" href="#" onClick=${(e) => { e.preventDefault(); window.pond.openExternal('https://forms.gle/zXyr1iSu3tzUMTTh9'); }}>Feedback</a>
         </div>
       </div>
 
