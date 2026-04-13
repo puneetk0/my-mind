@@ -3,38 +3,31 @@ const { screen } = require('electron');
 let pollInterval = null;
 let hideTimeout = null;
 
-// We own these values — no need to ask the OS
-const POPOVER_X_OFFSET = 345;
 const POPOVER_WIDTH = 690;
 const POPOVER_HEIGHT_OPEN = 460;
+const GRACE_MS = 300;
 
 function startNotchWatcher(win, showFn, hideFn, getVisibleFn) {
-  const { width: screenWidth } = screen.getPrimaryDisplay().bounds;
-
-  const popoverX = Math.round(screenWidth / 2 - POPOVER_X_OFFSET);
-
-const NOTCH_ZONE = {
-  x: Math.round(screenWidth / 2 - 100), // reduced width to 200
-  y: 0,
-  width: 200,
-  height: 25,  // greatly reduced from 60 to 25 so you have to actually hit the black notch
-};
-
-const GRACE_MS = 300;  // was 300
 
   function isCursorSafe(cx, cy) {
-    const inNotch =
-      cx >= NOTCH_ZONE.x &&
-      cx <= NOTCH_ZONE.x + NOTCH_ZONE.width &&
-      cy <= NOTCH_ZONE.height;
+    // Read fresh screen bounds every tick — after sleep/wake these can change
+    const { width: screenWidth } = screen.getPrimaryDisplay().bounds;
+    const popoverX = Math.round(screenWidth / 2 - POPOVER_WIDTH / 2);
 
-    // Added large padding buffers: 30px on sides, 60px on bottom
+    const notchX = Math.round(screenWidth / 2 - 100);
+
+    const inNotch =
+      cx >= notchX &&
+      cx <= notchX + 200 &&
+      cy <= 25;
+
+    // Large padding buffers: 30px on sides, 60px on bottom
     const inPopover =
       getVisibleFn() &&
       cx >= popoverX - 30 &&
       cx <= popoverX + POPOVER_WIDTH + 30 &&
       cy >= -20 &&
-      cy <= POPOVER_HEIGHT_OPEN + 60;  
+      cy <= POPOVER_HEIGHT_OPEN + 60;
 
     return { inNotch, inPopover, safe: inNotch || inPopover };
   }

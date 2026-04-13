@@ -1,4 +1,4 @@
-const { app, BrowserWindow, globalShortcut, screen, ipcMain } = require('electron');
+const { app, BrowserWindow, globalShortcut, screen, ipcMain, powerMonitor } = require('electron');
 const path = require('path');
 const db = require('./db');
 const { registerHandlers } = require('./ipc');
@@ -9,9 +9,22 @@ let win = null;
 let popoverVisible = false;
 let pinned = false;
 
+const POPOVER_WIDTH = 690;
+
+/**
+ * Recalculate the correct X/Y for the popover so it's centred at the
+ * top of the primary display.  Called on launch AND after sleep/wake
+ * or display-geometry changes.
+ */
+function repositionWindow() {
+  if (!win || win.isDestroyed()) return;
+  const { width: screenWidth } = screen.getPrimaryDisplay().bounds;
+  const x = Math.round(screenWidth / 2 - POPOVER_WIDTH / 2);
+  win.setPosition(x, 0, false);
+}
+
 function createWindow() {
   const { width: screenWidth } = screen.getPrimaryDisplay().bounds;
-  const POPOVER_WIDTH = 690;
 
   win = new BrowserWindow({
     width: POPOVER_WIDTH,
@@ -44,22 +57,23 @@ function createWindow() {
 
 function showPopover() {
   if (!win || popoverVisible) return;
+  // Always re-centre before opening — covers sleep/wake edge cases
+  repositionWindow();
   popoverVisible = true;
-  win.setSize(690, 460, true);
+  win.setSize(POPOVER_WIDTH, 460, true);
   win.webContents.send('popover:show');
 }
 
 function hidePopover() {
-  if (!win || !popoverVisible || pinned) return; // add pinned check
+  if (!win || !popoverVisible || pinned) return;
   popoverVisible = false;
-  win.setSize(690, 0, true);
+  win.setSize(POPOVER_WIDTH, 0, true);
   win.webContents.send('popover:hide');
 }
 
-
 function togglePopover() {
   if (popoverVisible) {
-    pinned = false; // Reset pinned state when manually toggling hide
+    pinned = false;
     if (win) win.webContents.send('popover:pinned', pinned);
     hidePopover();
   } else {
@@ -68,9 +82,14 @@ function togglePopover() {
 }
 
 app.whenReady().then(async () => {
-  await db.init();
+  // Create the window shell FIRST so the user sees something instantly,
+  // then initialise the database in parallel.
   registerHandlers();
   createWindow();
+
+  // DB init runs concurrently — IPC handlers will wait for it internally
+  await db.init();
+
   createTray(togglePopover);
 
   globalShortcut.register('CommandOrControl+Shift+L', () => {
@@ -94,6 +113,22 @@ app.whenReady().then(async () => {
   });
 
   startNotchWatcher(win, showPopover, hidePopover, () => popoverVisible);
+
+  // ── Fix: reposition when display geometry changes or after sleep/wake ──
+  screen.on('display-metrics-changed', repositionWindow);
+  screen.on('display-added', repositionWindow);
+  screen.on('display-removed', repositionWindow);
+
+  powerMonitor.on('resume', () => {
+    // After macOS wakes, the display bounds may have shifted.
+    // Small delay lets the compositor settle before we query.
+    setTimeout(() => {
+      repositionWindow();
+      // Also restart notch watcher with fresh screen metrics
+      stopNotchWatcher();
+      startNotchWatcher(win, showPopover, hidePopover, () => popoverVisible);
+    }, 500);
+  });
 
   ipcMain.on('popover:escape', () => hidePopover());
   ipcMain.on('popover:pin', () => {
