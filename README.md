@@ -68,12 +68,14 @@ Traditional productivity apps feel like work. **Camber feels like a race.**
 1. Go to [Releases](https://github.com/puneetko/camber/releases)
 2. Download `Camber.dmg` from the latest release
 3. Open the DMG and drag Camber to your Applications folder
-4. **First launch:** right-click Camber → Open → Open
+4. Try to open Camber — macOS will block it with a warning that the app is damaged or from an unidentified developer
+5. Go to **System Settings → Privacy & Security**, scroll down, and click **Open Anyway** next to Camber
+6. Confirm by clicking **Open** in the dialog that follows — Camber will launch normally from this point on
 
-> macOS will warn that Camber is from an unidentified developer because it is not yet notarized. Right-clicking and choosing Open bypasses this once — after that it opens normally.
+> This happens because Camber is not yet notarized with Apple. It is completely safe — macOS just requires this one-time override for apps outside the App Store that aren't notarized. After the first launch, it opens normally.
 
-<!-- SCREENSHOT: The macOS "cannot be opened" warning dialog with a caption explaining
-     the right-click workaround. Filename: gatekeeper.png -->
+<!-- SCREENSHOT: The macOS Privacy & Security panel showing the "Open Anyway" button.
+     Filename: gatekeeper.png -->
 
 ### Requirements
 
@@ -107,31 +109,49 @@ npm run build:renderer && npm run build
 
 Output lands in `dist/Camber.dmg` as a universal binary — runs natively on both Apple Silicon and Intel.
 
-
+---
 
 ## Architecture
 
 Camber is intentionally simple. No Redux, no complex state management. If you can read JavaScript, you can read Camber.
+
+```
 camber/
 ├── main/
-│   ├── index.js          # Electron entry — window, tray, shortcuts, IPC wiring
-│   ├── db.js             # All SQLite via sql.js — schema, queries, migrations
-│   ├── ipc.js            # ipcMain handlers — bridges renderer requests to db
-│   ├── notch.js          # Mouse polling — detects notch hover, shows/hides popover
-│   └── tray.js           # Menubar tray icon and context menu
 ├── renderer/
-│   ├── index.html        # Shell
-│   ├── globals.js        # HTM + React bindings, shared hooks
-│   ├── app.js            # Root component — screen routing, global state
-│   ├── HomeScreen.js     # The race track — 10 lanes, cars, drag-to-swap
-│   ├── AddTaskScreen.js  # Garage form — title, notes, objectives, constructor picker
-│   ├── TaskDetailScreen.js # Pit wall — subtask checklist, progress circle, sectors
-│   ├── Overlays.js       # Shortcuts modal, celebration overlay
-│   ├── preload.js        # contextBridge — exposes window.pond API to renderer
-│   └── styles.css        # All styles in one file, CSS variables, no framework
 └── assets/
-├── cars/             # car1.png → car10.png — top-down F1 car sprites
-└── track-bg.png      # Track surface background
+```
+
+### `main/`
+
+The Electron backend. Handles native OS integration and all data operations.
+
+- **`index.js`** — Electron entry point: window setup, tray, global shortcuts, IPC wiring
+- **`db.js`** — All SQLite via sql.js: schema definitions, queries, and migrations
+- **`ipc.js`** — `ipcMain` handlers that bridge renderer requests to the database
+- **`notch.js`** — Mouse polling loop: detects notch hover, shows and hides the popover
+- **`tray.js`** — Menubar tray icon and its context menu
+
+### `renderer/`
+
+The UI layer. Pure React with no build step — HTM handles JSX in the browser directly.
+
+- **`index.html`** — Shell document
+- **`globals.js`** — HTM + React bindings, shared hooks
+- **`app.js`** — Root component: screen routing and global state
+- **`HomeScreen.js`** — The race track: 10 lanes, cars, drag-to-swap
+- **`AddTaskScreen.js`** — Garage form: title, notes, objectives, constructor picker
+- **`TaskDetailScreen.js`** — Pit wall: subtask checklist, progress circle, sectors
+- **`Overlays.js`** — Shortcuts modal and celebration overlay
+- **`preload.js`** — `contextBridge` that exposes `window.pond` to the renderer
+- **`styles.css`** — All styles in one file, CSS variables, no framework
+
+### `assets/`
+
+- **`cars/`** — `car1.png` through `car10.png`: top-down F1 car sprites
+- **`track-bg.png`** — Track surface background
+
+---
 
 ### How the notch trigger works
 
@@ -211,7 +231,6 @@ npm start
 - [canvas-confetti](https://github.com/catdad/canvas-confetti) — the celebration moment
 
 ---
-
 
 Built by [Puneet Kathuria](https://github.com/puneetko) as a personal project that got out of hand in the best way.
 
